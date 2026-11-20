@@ -121,7 +121,7 @@ const head= new THREE.Mesh(new THREE.SphereGeometry(.36,18,14),material(0xd8a17c
 const helmet= new THREE.Mesh(new THREE.SphereGeometry(.4,18,10,0,Math.PI*2,0,Math.PI/2),mats.yellow);helmet.position.y=2.62;player.add(helmet);const eyeMat=material(0x172b35,.5);for(const x of [-.13,.13]){const eye=new THREE.Mesh(new THREE.SphereGeometry(.045,8,8),eyeMat);eye.position.set(x,2.47,-.325);player.add(eye)}
 const legL=box(player,'Left leg',[.27,.75,.32],[-.25,.55,0],mats.blue),legR=box(player,'Right leg',[.27,.75,.32],[.25,.55,0],mats.blue);
 const heldVisual=group(player,[0,1.4,-1.0]);heldVisual.visible=false;const heldBox=box(heldVisual,'Carried special package',[.9,.8,.9],[0,0,0],material(0xd8b16b));box(heldVisual,'Package ribbon',[.12,.85,.94],[0,0,0],mats.red);
-let packageCollected=false,packageSecured=false,started=false,firstPerson=false,locked=false,yaw=.95,pitch=-.1,noticeTimer=0,walking=0;
+let packageCollected=false,packageSecured=false,started=false,firstPerson=false,locked=false,yaw=-.76,pitch=-.1,noticeTimer=0,walking=0;
 const keys={};const clock=new THREE.Clock();let nearest=null;
 function say(text){message.textContent=text;message.style.opacity='1';noticeTimer=2.7}
 function updateObjectives(){const count=crates.filter(c=>c.userData.loaded).length;$('#crate-count').textContent=count+' / 4';$('#crate-objective').classList.toggle('done',count===4);$('#package-state').textContent=packageCollected?'COLLECTED':'NOT COLLECTED';$('#package-objective').classList.toggle('done',packageCollected);$('#secure-state').textContent=packageSecured?'SECURED':'WAITING';$('#secure-objective').classList.toggle('done',packageSecured)}
