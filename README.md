@@ -10,7 +10,7 @@ This is a redesigned single-player browser prototype focused on the game's openi
 - A larger docked cargo ship with bridge, cargo deck, containers, railings and boarding ramp.
 - A port terminal with a warehouse, office, yard markings, storage areas and a large shore-based gantry crane.
 - Four large, coloured metal cargo containers staged on the dock; the ship deck starts empty.
-- A crane-control interaction that moves the trolley along the dock, raises/lowers the hook and attaches/releases crates.
+- A visible ground-level crane control kiosk, so operators never need to climb a ladder or stand on a control box. The crane moves independently while the player stays in place.
 - Crates can be loaded onto the ship by carrying them over the cargo deck before releasing.
 - A special package inside the warehouse that the player can collect and carry aboard.
 - A departure checklist tracking all four crates and the special package.
@@ -33,6 +33,7 @@ This is a redesigned single-player browser prototype focused on the game's openi
 | A / D | Move crane trolley across the ship |
 | R / F | Lower / raise hook (R lowers, F raises) |
 | E | Attach a nearby crate or release the held crate |
+| Q | Exit crane controls and return to walking |
 
 Click the game after entering the port to capture the mouse. Press Escape to release it.
 
