@@ -95,11 +95,10 @@ box(craneRoom,'Control room floor rear',[6.8,.3,1.8],[0,0,-3.1],mats.dark);
 box(craneRoom,'Control room floor front',[6.8,.3,.9],[0,0,3.55],mats.dark);
 box(craneRoom,'Control room roof',[10,.35,8],[0,4.35,0],mats.dark);
 for(const x of [-4.85,4.85])box(craneRoom,'Control room side wall',[.3,4.2,8],[x,2.1,0],mats.dark);
-box(craneRoom,'Control room rear wall',[9.7,4.2,.3],[0,2.1,-3.85],mats.dark);
-box(craneRoom,'Front window lower frame',[9.6,.35,.25],[0,.45,3.85],mats.yellow);
-box(craneRoom,'Front window upper frame',[9.6,.3,.25],[0,4.0,3.85],mats.yellow);
-box(craneRoom,'Panoramic front window',[9.3,3.25,.12],[0,2.25,3.82],mats.glass);
-for(const x of [-3.2,-1.6,0,1.6,3.2])box(craneRoom,'Window mullion',[.12,3.3,.16],[x,2.25,3.72],mats.steel);
+box(craneRoom,'Observation window lower frame',[9.6,.35,.25],[0,.45,-3.85],mats.yellow);
+box(craneRoom,'Observation window upper frame',[9.6,.3,.25],[0,4.0,-3.85],mats.yellow);
+box(craneRoom,'Panoramic observation window',[9.3,3.25,.12],[0,2.25,-3.82],mats.glass);
+for(const x of [-3.2,-1.6,0,1.6,3.2])box(craneRoom,'Window mullion',[.12,3.3,.16],[x,2.25,-3.72],mats.steel);
 box(craneRoom,'Left observation window',[.12,2.8,5.8],[-4.82,2.3,0],mats.glass);
 box(craneRoom,'Right observation window',[.12,2.8,5.8],[4.82,2.3,0],mats.glass);
 let trapdoorOpen=false;
@@ -190,12 +189,13 @@ function movePlayer(dt){if(!started||craneMode)return;
  if(onLadder&&(keys.KeyW||keys.KeyS)){
   climbingLadder=true;player.userData.velocityY=0;player.position.y=THREE.MathUtils.clamp(player.position.y+(keys.KeyW?1:-1)*5.2*dt,.2,towerFloor);
   if(player.position.y>=towerFloor-.05)player.position.y=towerFloor;
-  player.rotation.y=0;
+  yaw=0;player.rotation.y=0;
  }else{
   climbingLadder=false;
   const move=new THREE.Vector3();const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw)),right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
   if(keys.KeyW)move.add(forward);if(keys.KeyS)move.sub(forward);if(keys.KeyD)move.add(right);if(keys.KeyA)move.sub(right);
   player.rotation.y=yaw;
+  if(!trapdoorOpen&&player.position.y>10&&Math.abs(player.position.x-towerX)<2.2&&player.position.z>2.8&&keys.KeyW)move.set(0,0,0);
   if(move.lengthSq()){move.normalize().multiplyScalar((keys.ShiftLeft?7.2:5.2)*dt);player.position.add(move);walking+=dt*10;legL.rotation.x=Math.sin(walking)*.55;legR.rotation.x=-Math.sin(walking)*.55;armL.rotation.x=-Math.sin(walking)*.32;armR.rotation.x=Math.sin(walking)*.32}
   player.position.x=THREE.MathUtils.clamp(player.position.x,-112,47);player.position.z=THREE.MathUtils.clamp(player.position.z,-58,58);
   if(player.position.x>-48&&player.position.x<-43&&player.position.z>-31&&player.position.z<-9)player.position.x=-48;
@@ -207,7 +207,7 @@ function movePlayer(dt){if(!started||craneMode)return;
  if(packageCollected&&!packageSecured)heldVisual.position.set(0,1.45,-1.05);
 }
 function moveCrane(dt){if(!craneMode)return;const speed=12;if(keys.KeyA)trolleyX-=speed*dt;if(keys.KeyD)trolleyX+=speed*dt;if(keys.KeyW)trolleyZ-=speed*dt;if(keys.KeyS)trolleyZ+=speed*dt;if(keys.KeyR)hookY=Math.min(18.2,hookY+9*dt);if(keys.KeyF)hookY=Math.max(2,hookY-9*dt);trolleyX=THREE.MathUtils.clamp(trolleyX,-29,48);trolleyZ=THREE.MathUtils.clamp(trolleyZ,-32,32);updateCrane();if(attachedCrate){attachedCrate.position.set(trolleyX,22.8-hookY,trolleyZ);attachedCrate.rotation.y=0}}
-function cameraUpdate(dt){head.visible=!firstPerson;helmet.visible=!firstPerson;for(const eye of eyes)eye.visible=!firstPerson;const eye=player.position.clone().add(new THREE.Vector3(0,firstPerson?1.78:2.65,0));const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));if(firstPerson){camera.position.copy(eye);camera.rotation.order='YXZ';camera.rotation.y=yaw;camera.rotation.x=pitch}else{const behind=forward.clone().multiplyScalar(-8);const desired=eye.clone().add(behind).add(new THREE.Vector3(0,3.6,0));camera.position.lerp(desired,1-Math.pow(.0001,dt));const target=eye.clone().add(forward.multiplyScalar(8)).add(new THREE.Vector3(0,Math.sin(pitch)*5,0));camera.lookAt(target)}}
+function cameraUpdate(dt){for(const part of player.children)if(part!==armL&&part!==armR&&part!==heldVisual)part.visible=!firstPerson;const eye=player.position.clone().add(new THREE.Vector3(0,firstPerson?1.78:2.65,0));const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));if(firstPerson){camera.position.copy(eye);camera.rotation.order='YXZ';camera.rotation.y=yaw;camera.rotation.x=pitch}else{const behind=forward.clone().multiplyScalar(-8);const desired=eye.clone().add(behind).add(new THREE.Vector3(0,3.6,0));camera.position.lerp(desired,1-Math.pow(.0001,dt));const target=eye.clone().add(forward.multiplyScalar(8)).add(new THREE.Vector3(0,Math.sin(pitch)*5,0));camera.lookAt(target)}}
 function areaLabel(){const x=player.position.x;if(x<-47&&player.position.z<-8&&player.position.z>-34)return ['WAREHOUSE','SPECIAL PACKAGE'];if(Math.abs(x-towerX)<7&&player.position.y>9)return ['CRANE CONTROL TOWER',trapdoorOpen?'CONTROL ROOM':'TRAPDOOR'];if(x>15)return ['MV WAYFARER','CARGO DECK'];if(craneMode)return ['PORT CRANE','LOADING AREA'];return ['PORT TERMINAL','DOCKSIDE']}
 function tick(){requestAnimationFrame(tick);const dt=Math.min(clock.getDelta(),.04),t=clock.elapsedTime;const pos=waterGeo.attributes.position;for(let i=0;i<pos.count;i++){const x=waterBase[i*3],z=waterBase[i*3+2];pos.array[i*3+1]=Math.sin(x*.04+t)*.28+Math.cos(z*.05+t*.7)*.2}pos.needsUpdate=true;waterGeo.computeVertexNormals();
  if(started){movePlayer(dt);moveCrane(dt);nearest=craneMode?{action:'crane-controls',label:'Crane controls'}:findTarget();if(craneMode){prompt.classList.remove('hidden');promptText.textContent='W/S crane bridge · A/D trolley · R lower · F raise hook · E attach/release · Q exit'}else if(nearest){prompt.classList.remove('hidden');promptText.textContent=nearest.label}else prompt.classList.add('hidden');const [a,b]=areaLabel();$('#area-name').textContent=a;$('#coordinates').textContent=b;cameraUpdate(dt)}
