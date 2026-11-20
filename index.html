@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071b2b">
+  <title>Cargo Chaos</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="game"></div>
+  <div id="title-card">
+    <div class="eyebrow">CO-OP CARGO ADVENTURE</div>
+    <h1>CARGO <span>CHAOS</span></h1>
+    <p>One ship. One very important package. An unreasonable amount of ocean.</p>
+    <button id="start-button">BOARD THE SHIP</button>
+    <small>Stage 1 prototype · Multiplayer is coming in a later stage</small>
+  </div>
+
+  <div id="hud" class="hidden">
+    <div class="hud-top">
+      <div class="ship-name">MV <strong>WAYFARER</strong><small> CARGO VESSEL</small></div>
+      <div class="status"><i></i> ALL SYSTEMS NOMINAL</div>
+    </div>
+    <div class="mission">
+      <span class="eyebrow">CURRENT JOB</span>
+      <strong>Deliver the package</strong>
+      <span>Keep it safe. Try not to sink.</span>
+    </div>
+    <div id="crosshair"></div>
+    <div id="prompt" class="hidden"></div>
+    <div id="notice"></div>
+    <div class="bottom-left">
+      <div class="compass">N <span id="heading">000°</span></div>
+      <div class="location">OPEN OCEAN <span>·</span> WAYFARER</div>
+    </div>
+    <div class="controls">
+      <span><b>W A S D</b> Move</span>
+      <span><b>MOUSE</b> Look</span>
+      <span><b>C</b> Camera</span>
+      <span><b>E</b> Interact</span>
+      <span><b>ESC</b> Pause</span>
+    </div>
+    <div id="camera-label">THIRD PERSON</div>
+  </div>
+  <script type="module" src="game.js"></script>
+</body>
+</html>
