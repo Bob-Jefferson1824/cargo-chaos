@@ -1,257 +1,151 @@
 import * as THREE from 'three';
 
-const mount = document.querySelector('#game');
-const titleCard = document.querySelector('#title-card');
-const startButton = document.querySelector('#start-button');
-const hud = document.querySelector('#hud');
-const prompt = document.querySelector('#prompt');
-const notice = document.querySelector('#notice');
-const cameraLabel = document.querySelector('#camera-label');
-const headingText = document.querySelector('#heading');
+const $=s=>document.querySelector(s);
+const mount=$('#game'),intro=$('#intro'),hud=$('#hud'),prompt=$('#interaction'),promptText=$('#interaction-text'),message=$('#message');
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x9bcbd4);scene.fog=new THREE.Fog(0x9bcbd4,105,330);
+const camera=new THREE.PerspectiveCamera(68,innerWidth/innerHeight,.1,650);
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;mount.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xdaf5ff,0x4b5c50,2.0));
+const sun=new THREE.DirectionalLight(0xffedcf,2.6);sun.position.set(-75,110,-35);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-115;sun.shadow.camera.right=115;sun.shadow.camera.top=115;sun.shadow.camera.bottom=-115;scene.add(sun);
+const material=(color,roughness=.8,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
+const mats={concrete:material(0x858e88),paint:material(0xe7dfca),yellow:material(0xe7ad45),dark:material(0x253c48),steel:material(0x657c83,.45,.45),red:material(0xb84d3c),blue:material(0x3c7088),green:material(0x54806c),wood:material(0xb9854b),glass:material(0x4b8490,.22,.25),white:material(0xe5e6dc),black:material(0x172b35)};
+function box(parent,name,size,pos,mat,opts={}){const m=new THREE.Mesh(new THREE.BoxGeometry(...size),mat);m.name=name;m.position.set(...pos);m.castShadow=opts.cast!==false;m.receiveShadow=true;parent.add(m);return m}
+function cylinder(parent,name,r1,r2,h,pos,mat,segments=12){const m=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,segments),mat);m.name=name;m.position.set(...pos);m.castShadow=true;parent.add(m);return m}
+function group(parent,pos=[0,0,0]){const g=new THREE.Group();g.position.set(...pos);parent.add(g);return g}
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x8fc3d3);
-scene.fog = new THREE.Fog(0x8fc3d3, 90, 360);
+// Ocean and port land
+const waterGeo=new THREE.PlaneGeometry(650,520,90,70);waterGeo.rotateX(-Math.PI/2);const waterMat=new THREE.MeshStandardMaterial({color:0x187f98,roughness:.32,metalness:.08,flatShading:true});const water=new THREE.Mesh(waterGeo,waterMat);water.position.set(90,-1.4,0);water.receiveShadow=true;scene.add(water);const waterBase=Float32Array.from(waterGeo.attributes.position.array);
+box(scene,'Port land',[120,1,130],[-65,-.55,0],mats.concrete);
+box(scene,'Dock apron',[32,1.2,92],[5,-.1,0],material(0x687c7d));
+box(scene,'Quay edge',[1.4,2,94],[20,-.05,0],mats.white);
+for(let z=-42;z<=42;z+=14){cylinder(scene,'Mooring bollard',.42,.48,1,[18.7,.5,z],mats.dark);box(scene,'Quay stripe',[.35,.04,5],[17.8,.55,z],mats.yellow)}
+// painted lines and yard markings
+for(let z=-37;z<=37;z+=12){box(scene,'Yard line',[.18,.025,7],[-42,.02,z],mats.yellow,{cast:false});box(scene,'Yard line',[.18,.025,7],[-8,.02,z],mats.yellow,{cast:false})}
+for(let x=-85;x<-5;x+=10){box(scene,'Concrete expansion joint',[.08,.02,90],[x,.015,0],material(0x747e78),{cast:false})}
 
-const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 900);
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-renderer.setSize(innerWidth, innerHeight);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-mount.appendChild(renderer.domElement);
+// Distant port skyline and storage tanks
+for(let i=0;i<11;i++){const x=-108+(i%6)*17,z=-57+Math.floor(i/6)*114;const h=10+(i*7)%15;box(scene,'Port warehouse silhouette',[12,h,16],[x,h/2-.2,z],material(i%2?0x647b80:0x8a8f83));box(scene,'Warehouse roof',[12.8,.6,16.8],[x,h,z],mats.dark)}
+for(let i=0;i<5;i++){cylinder(scene,'Fuel silo',4.2,4.2,12,[-100+i*13,5.5,48],material(0xa9b1a9),20);cylinder(scene,'Silo roof',4.3,0,2,[-100+i*13,12.5,48],mats.dark,20)}
 
-scene.add(new THREE.HemisphereLight(0xc9edff, 0x294454, 2.0));
-const sun = new THREE.DirectionalLight(0xffedcf, 2.4);
-sun.position.set(-55, 90, 35);
-sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
-sun.shadow.camera.left = -100; sun.shadow.camera.right = 100;
-sun.shadow.camera.top = 100; sun.shadow.camera.bottom = -100;
-scene.add(sun);
+// Warehouse building and package interior
+const warehouse=group(scene,[-61,0,-20]);
+box(warehouse,'Warehouse floor',[25,.6,23],[0,.3,0],material(0x737b75));
+box(warehouse,'Warehouse back wall',[25,9,.8],[0,4.8,-11],material(0x9a9d91));
+box(warehouse,'Warehouse left wall',[.8,9,23],[-12.5,4.8,0],material(0x9a9d91));
+box(warehouse,'Warehouse right wall',[.8,9,23],[12.5,4.8,0],material(0x9a9d91));
+box(warehouse,'Warehouse roof',[26,.7,24],[0,9.3,0],mats.dark);
+box(warehouse,'Warehouse sign',[9,1.5,.25],[0,7.4,11.6],mats.yellow);
+box(warehouse,'Warehouse sign lettering',[.4,.4,.12],[0,7.4,11.43],mats.black);
+for(let x=-8;x<=8;x+=4){box(warehouse,'Storage rack',[.25,5,7],[x,2.8,-5],mats.dark);for(let y=1;y<=4;y+=1.5)box(warehouse,'Rack shelf',[3.5,.18,6],[x+1.5,y,-5],mats.yellow)}
+const packageMesh=group(scene,[-61,1.0,-14]);
+const packageBox=box(packageMesh,'Special package',[1.7,1.5,1.7],[0,.8,0],material(0xd8b16b));
+for(let x of [-.44,.44])box(packageMesh,'Package strap',[.12,1.54,1.76],[x,.8,0],mats.red);
+box(packageMesh,'Fragile label',[.55,.36,.035],[0,.8,.87],mats.white,{cast:false});
+const packageGlow=new THREE.PointLight(0xffd38b,1.5,5);packageGlow.position.set(0,2.3,0);packageMesh.add(packageGlow);
 
-const mat = (color, roughness=.78, metalness=0) => new THREE.MeshStandardMaterial({color, roughness, metalness});
-const oceanMat = new THREE.MeshStandardMaterial({color:0x167c9a, roughness:.34, metalness:.12, flatShading:true});
-const waterGeo = new THREE.PlaneGeometry(900,900,110,110);
-waterGeo.rotateX(-Math.PI/2);
-const water = new THREE.Mesh(waterGeo,oceanMat);
-water.position.y=-1.2; water.receiveShadow=true; scene.add(water);
-const waterPositions = waterGeo.attributes.position;
-const waterBase = Float32Array.from(waterPositions.array);
+// Port crane staging zone
+for(let i=0;i<4;i++){const z=-24+i*16;box(scene,'Crate staging pad',[8,.12,8],[-24,.08,z],material(0x596b68));box(scene,'Pad border',[8.3,.08,.18],[-24,.18,z-4],mats.yellow);box(scene,'Pad border',[8.3,.08,.18],[-24,.18,z+4],mats.yellow)}
+const crateColors=[0xc58c4f,0x9e7449,0xc49a5e,0xb27d45];
+const crates=[];
+for(let i=0;i<4;i++){const z=-24+i*16;const g=group(scene,[-24,0,z]);const body=box(g,'Cargo crate',[3.4,3.1,3.4],[0,1.55,0],material(crateColors[i]));for(let x of [-1.2,1.2])box(g,'Crate reinforcement',[.16,3.15,3.48],[x,1.55,0],mats.dark);for(let zz of [-1.2,1.2])box(g,'Crate reinforcement',[3.48,3.15,.16],[0,1.55,zz],mats.dark);box(g,'Crate lid band',[3.45,.16,3.45],[0,3.05,0],mats.yellow);g.userData={loaded:false,held:false,index:i};crates.push(g)}
 
-const ship = new THREE.Group();
-scene.add(ship);
+// The larger docked cargo vessel
+const ship=group(scene,[29,0,0]);ship.userData.isShip=true;
+const hull=box(ship,'Cargo ship hull',[28,8,72],[0,0,0],material(0x263f50,.48,.22));hull.position.y=0;
+const bow= new THREE.Mesh(new THREE.ConeGeometry(14,15,4),material(0x263f50,.48,.2));bow.rotation.x=Math.PI/2;bow.rotation.z=Math.PI/4;bow.scale.set(1,.55,1);bow.position.set(0,-.3,-41);bow.castShadow=true;ship.add(bow);
+box(ship,'Red waterline stripe',[28,.65,72],[0,-3.5,0],mats.red);
+box(ship,'Main deck',[27.2,.7,70],[0,4.35,0],material(0x9b927e));
+box(ship,'Deck edge trim',[28.5,.3,71],[0,4.0,0],mats.white);
+for(let side of [-1,1]){box(ship,'Ship rail',[.28,1.35,68],[side*13.35,5.2,0],mats.white);for(let z=-32;z<=32;z+=4)cylinder(ship,'Rail stanchion',.09,.09,1.4,[side*13.35,5.2,z],mats.steel,8)}
+// Fore and aft cargo containers, leaving a broad central working lane
+const shipContainerColors=[mats.red,mats.blue,mats.green,mats.yellow];
+for(let row=0;row<2;row++){for(let side of [-1,1]){const x=side*7.2,z=row===0?-20:20;const c=box(ship,'Container',[10,7,15],[x,8.1,z],shipContainerColors[row*2+(side===1?1:0)]);for(let zz=-6;zz<=6;zz+=1.2)box(ship,'Container corrugation',[10.04,6.6,.08],[x,8.1,z+zz],mats.dark,{cast:false})}}
+// Bridge and windows at stern
+box(ship,'Bridge lower deck',[17,5,12],[0,7.2,28],mats.white);
+box(ship,'Bridge glazing',[17.2,2.3,12.1],[0,8.4,28],mats.glass);
+box(ship,'Bridge roof',[18,.7,13],[0,9.9,28],mats.yellow);
+for(let x=-7;x<=7;x+=2.8)box(ship,'Bridge window mullion',[.18,2.4,.18],[x,8.4,21.95],mats.dark);
+cylinder(ship,'Ship mast',.22,.3,8,[0,14,28],mats.white);
+for(let i=0;i<3;i++)box(ship,'Mast antenna',[3,.12,.12],[0,15+i*.55,28],mats.dark);
+box(ship,'Funnel',[4,8,5],[7,13,15],mats.red);box(ship,'Funnel cap',[4.3,.7,5.3],[7,17.2,15],mats.dark);
+// Deck markings and package bay
+box(ship,'Cargo bay marking',[8,.04,8],[0,4.73,0],mats.yellow,{cast:false});
+box(ship,'Package securing platform',[4,.18,4],[0,4.85,0],mats.dark);
+for(let x of [-2,2])for(let z of [-2,2])cylinder(ship,'Package tie-down',.16,.16,.35,[x,5.05,z],mats.yellow,8);
+// gangway from dock onto ship
+const ramp=box(scene,'Boarding gangway',[14,.55,5],[12,2.05,31],material(0x9a9c91));ramp.rotation.z=-.2;
+for(let x=6;x<=18;x+=2)box(scene,'Gangway handrail',[.14,1.15,.14],[x,2.9,28.6],mats.white);
 
-// Hull and main deck
-const hull = new THREE.Mesh(new THREE.BoxGeometry(17,4.4,43),mat(0x263f50,.48,.25));
-hull.position.set(0,1.0,0); hull.castShadow=true; hull.receiveShadow=true; ship.add(hull);
-const bow = new THREE.Mesh(new THREE.ConeGeometry(8.5,9,4),mat(0x263f50,.48,.25));
-bow.rotation.x=Math.PI/2; bow.rotation.z=Math.PI/4; bow.scale.set(1,.48,1); bow.position.set(0,1,-24); bow.castShadow=true; ship.add(bow);
-const deck = new THREE.Mesh(new THREE.BoxGeometry(16.4,.55,42),mat(0x9a8063));
-deck.position.set(0,3.35,0); deck.receiveShadow=true; deck.castShadow=true; ship.add(deck);
-const deckTrim = new THREE.Mesh(new THREE.BoxGeometry(17.3,.35,43.5),mat(0xd6a85f));
-deckTrim.position.set(0,3.05,0); ship.add(deckTrim);
+// Massive shore gantry crane spanning the cargo loading area
+const crane=group(scene,[0,0,0]);crane.userData.mode=false;
+const railLeft=box(crane,'Crane runway left',[2,1,78],[-34,0,0],mats.dark);railLeft.position.y=.55;
+const railRight=box(crane,'Crane runway right',[2,1,78],[50,.55,0],mats.dark);
+for(let x of [-34,50])for(let z of [-34,34]){box(crane,'Gantry leg',[2,20,2],[x,10,z],mats.yellow);box(crane,'Gantry foot',[5,1.2,5],[x,.6,z],mats.dark);box(crane,'Crane diagonal brace',[.8,13,.8],[x<0?-30:46,8,z],mats.steel)}
+box(crane,'Crane rail left',[.8,.8,72],[-34,20,0],mats.steel);box(crane,'Crane rail right',[.8,.8,72],[50,20,0],mats.steel);
+const bridge=box(crane,'Crane moving bridge',[2.4,1.8,88],[8,21,0],mats.yellow);bridge.rotation.y=Math.PI/2; // decorative span, trolley track
+const trolley=group(scene,[0,0,0]);
+box(trolley,'Trolley housing',[4,2.2,4],[0,0,0],mats.dark);
+const cable=cylinder(trolley,'Crane cable',.09,.09,7,[0,-4.4,0],mats.black,8);
+const hook= new THREE.Mesh(new THREE.TorusGeometry(.65,.16,8,16,Math.PI*1.65),mats.yellow);hook.rotation.z=Math.PI;hook.position.set(0,-8.2,0);trolley.add(hook);
+let trolleyX=8,trolleyZ=0,hookY=8,craneMode=false,attachedCrate=null;
+function updateCrane(){trolley.position.set(trolleyX,21-hookY,trolleyZ);cable.scale.y=hookY/7;cable.position.y=-hookY/2;hook.position.y=-hookY-.3;}
+updateCrane();
 
-// Side rails
-for(const side of [-1,1]){
-  const rail = new THREE.Mesh(new THREE.BoxGeometry(.22,1.1,42),mat(0xe1e4dc));
-  rail.position.set(side*8.1,4.15,0); rail.castShadow=true; ship.add(rail);
-  for(let z=-19;z<=20;z+=4){
-    const post=new THREE.Mesh(new THREE.BoxGeometry(.22,1.25,.22),mat(0x4a6471));
-    post.position.set(side*8.1,4.1,z); ship.add(post);
-  }
+// Dock details: bollards, lights, pallets, parked equipment
+for(let z=-35;z<=35;z+=18){const lamp=group(scene,[13,0,z]);cylinder(lamp,'Lamp post',.12,.16,8,[0,4,0],mats.dark);box(lamp,'Lamp head',[1.4,.3,.8],[0,8,0],mats.yellow);const light=new THREE.PointLight(0xffd89c,.5,12);light.position.set(0,7.7,0);lamp.add(light)}
+for(let i=0;i<6;i++){const p=group(scene,[-76+(i%3)*9,.1,31+Math.floor(i/3)*7]);box(p,'Pallet',[5,.3,5],[0,0,0],mats.wood);for(let y=0;y<2;y++)box(p,'Pallet cargo',[3,1.1,3],[0,.7+y*1.2,0],i%2?mats.blue:mats.green)}
+// Decorative port office
+box(scene,'Port office',[19,9,15],[-91,4.5,-25],material(0x879c9a));box(scene,'Office roof',[20,.8,16],[-91,9.4,-25],mats.dark);for(let x=-98;x<=-84;x+=7)box(scene,'Office window',[.15,3,.2],[x,5,-17.4],mats.glass);
+
+// Player character
+const player=group(scene,[-78,0,-2]);player.userData.velocityY=0;
+const body= new THREE.Mesh(new THREE.CapsuleGeometry(.48,.95,5,10),material(0xe3a36c));body.position.y=1.45;body.castShadow=true;player.add(body);
+const vest=box(player,'Hi-vis vest',[.95,.72,.55],[0,1.5,0],material(0xe27b32));
+const head= new THREE.Mesh(new THREE.SphereGeometry(.36,18,14),material(0xd8a17c));head.position.y=2.45;head.castShadow=true;player.add(head);
+const helmet= new THREE.Mesh(new THREE.SphereGeometry(.4,18,10,0,Math.PI*2,0,Math.PI/2),mats.yellow);helmet.position.y=2.62;player.add(helmet);
+const legL=box(player,'Left leg',[.27,.75,.32],[-.25,.55,0],mats.blue),legR=box(player,'Right leg',[.27,.75,.32],[.25,.55,0],mats.blue);
+const heldVisual=group(player,[0,1.4,-1.0]);heldVisual.visible=false;const heldBox=box(heldVisual,'Carried special package',[.9,.8,.9],[0,0,0],material(0xd8b16b));box(heldVisual,'Package ribbon',[.12,.85,.94],[0,0,0],mats.red);
+let packageCollected=false,packageSecured=false,started=false,firstPerson=false,locked=false,yaw=0,pitch=-.1,noticeTimer=0,walking=0;
+const keys={};const clock=new THREE.Clock();let nearest=null;
+function say(text){message.textContent=text;message.style.opacity='1';noticeTimer=2.7}
+function updateObjectives(){const count=crates.filter(c=>c.userData.loaded).length;$('#crate-count').textContent=count+' / 4';$('#crate-objective').classList.toggle('done',count===4);$('#package-state').textContent=packageCollected?'COLLECTED':'NOT COLLECTED';$('#package-objective').classList.toggle('done',packageCollected);$('#secure-state').textContent=packageSecured?'SECURED':'WAITING';$('#secure-objective').classList.toggle('done',packageSecured)}
+function shipDeckAt(x,z){return x>15&&x<43&&Math.abs(z)<35}
+function playerHeight(){const x=player.position.x,z=player.position.z;if(shipDeckAt(x,z))return 4.75;if(x>5&&x<19&&z>25&&z<36){const t=THREE.MathUtils.clamp((x-5)/14,0,1);return t*4.75+.2}return .2}
+function findTarget(){const p=player.position;let best=null,bestD=5.2;const near=(obj,pos,dist,action,label)=>{const d=p.distanceTo(new THREE.Vector3(...pos));if(d<dist&&d<bestD){bestD=d;best={obj,action,label,d}}};
+ if(!packageCollected&&!packageSecured)near(packageMesh,[-61,1,-14],5.5,'package','Collect the special package');
+ if(packageCollected&&!packageSecured&&shipDeckAt(p.x,p.z)&&Math.abs(p.x-29)<10&&Math.abs(p.z)<10)near(ship,[29,5,0],7,'secure','Secure the special package aboard');
+ if(!craneMode)near(crane,[-5,1,0],6,'crane','Operate the port crane');
+ if(craneMode)near(crane,[-5,1,0],6,'crane','Leave crane controls');
+ if(!craneMode&&!packageCollected)for(const c of crates)if(!c.userData.loaded&&!c.userData.held)near(c,c.position.toArray(),'crate','Inspect crate '+(c.userData.index+1));
+ return best}
+function setCamera(){ $('#mode-label').textContent=firstPerson?'FIRST PERSON':'THIRD PERSON';}
+function interact(){if(!nearest){say('Nothing close enough to interact with.');return}
+ if(nearest.action==='crane'){craneMode=!craneMode;$('#area-name').textContent=craneMode?'PORT CRANE CONTROLS':'PORT TERMINAL';say(craneMode?'Crane controls: W/S move along dock · A/D move across · R/F raise/lower · E attach or release':'You step away from the crane controls.');return}
+ if(nearest.action==='package'){packageCollected=true;packageMesh.visible=false;heldVisual.visible=true;updateObjectives();say('Special package collected. Carry it aboard carefully.');return}
+ if(nearest.action==='secure'){packageSecured=true;heldVisual.visible=false;packageMesh.position.set(29,5.1,0);packageMesh.visible=true;packageMesh.scale.set(.9,.9,.9);updateObjectives();say('Package secured! Keep it safe until delivery.');return}
+ if(nearest.action==='crate'){say('Use the large port crane to lift this crate onto the ship.');return}
 }
-
-// Bridge at the stern
-const bridgeBase = new THREE.Mesh(new THREE.BoxGeometry(12,4.2,10),mat(0xd9ded8));
-bridgeBase.position.set(0,5.65,14); bridgeBase.castShadow=true; bridgeBase.receiveShadow=true; ship.add(bridgeBase);
-const bridgeGlass = new THREE.Mesh(new THREE.BoxGeometry(12.1,1.8,10.1),mat(0x4c8999,.2,.35));
-bridgeGlass.position.set(0,6.3,14); ship.add(bridgeGlass);
-const bridgeRoof = new THREE.Mesh(new THREE.BoxGeometry(13, .55, 11),mat(0xf0a64b));
-bridgeRoof.position.set(0,8.05,14); bridgeRoof.castShadow=true; ship.add(bridgeRoof);
-const mast = new THREE.Mesh(new THREE.CylinderGeometry(.18,.28,7,8),mat(0xe7e8df));
-mast.position.set(0,11.5,14); ship.add(mast);
-for(let i=0;i<3;i++){const antenna=new THREE.Mesh(new THREE.BoxGeometry(2.8,.12,.12),mat(0x263f50));antenna.position.set(0,12.4+i*.5,14);ship.add(antenna);}
-
-// Cargo containers
-const containerColors=[0xd66b43,0x426d88,0xd4a34e,0x4d806f,0x9a5960,0x527f9b];
-for(let row=0;row<2;row++){
-  for(let col=0;col<2;col++){
-    const c=new THREE.Mesh(new THREE.BoxGeometry(6.5,3.2,8.2),mat(containerColors[row*2+col]));
-    c.position.set(col===0?-3.5:3.5,5.15,row===0?-5:-14);
-    c.castShadow=true;c.receiveShadow=true;ship.add(c);
-    for(let x=-2.7;x<=2.7;x+=.9){
-      const rib=new THREE.Mesh(new THREE.BoxGeometry(.09,3,.08),mat(0x263f50));
-      rib.position.set(c.position.x+x,5.15,c.position.z+4.12);ship.add(rib);
-    }
-  }
+function attachOrRelease(){if(attachedCrate){const g=attachedCrate;g.userData.held=false;g.userData.heldByCrane=false;g.position.set(trolleyX,Math.max(.1,21-hookY-1.7),trolleyZ);if(trolleyX>15&&trolleyX<43&&Math.abs(trolleyZ)<33&&hookY<14){g.userData.loaded=true;g.position.set(trolleyX,5.0,trolleyZ);g.rotation.y=0;say('Crate '+(g.userData.index+1)+' loaded aboard!');}else{g.position.y=1.6;say('Crate set down on the dock. Move it over the ship to load it.')}attachedCrate=null;updateObjectives();return}
+ const candidates=crates.filter(c=>!c.userData.loaded&&!c.userData.held);let chosen=null,distance=4.3;for(const c of candidates){const d=Math.hypot(c.position.x-trolleyX,c.position.z-trolleyZ);if(d<distance&&hookY>13){chosen=c;distance=d}}
+ if(chosen){attachedCrate=chosen;chosen.userData.held=true;chosen.userData.heldByCrane=true;say('Crate attached. Lift it slowly and move it over the ship.')}else say('Lower the hook over a crate on the marked staging pads first.')}
+function movePlayer(dt){if(!started)return;const move=new THREE.Vector3();const forward=new THREE.Vector3(Math.sin(yaw),0,-Math.cos(yaw)),right=new THREE.Vector3(Math.cos(yaw),0,Math.sin(yaw));if(keys.KeyW)move.add(forward);if(keys.KeyS)move.sub(forward);if(keys.KeyD)move.add(right);if(keys.KeyA)move.sub(right);if(move.lengthSq()){move.normalize().multiplyScalar((keys.ShiftLeft?9:6.2)*dt);player.position.add(move);player.rotation.y=yaw;walking+=dt*10;legL.rotation.x=Math.sin(walking)*.55;legR.rotation.x=-Math.sin(walking)*.55}
+ player.position.x=THREE.MathUtils.clamp(player.position.x,-112,17.8);player.position.z=THREE.MathUtils.clamp(player.position.z,-58,58);
+ // Do not walk into the warehouse walls; its front doorway is left open.
+ if(player.position.x>-48&&player.position.x<-43&&player.position.z>-31&&player.position.z<-9){player.position.x=-48}
+ // The quay is a solid edge except at the boarding ramp.
+ if(player.position.x>19&& !shipDeckAt(player.position.x,player.position.z))player.position.x=19;
+ player.position.y=playerHeight();
+ if(packageCollected&&!packageSecured){heldVisual.position.set(0,1.45,-1.05)}
 }
-
-// Crane: pedestal, mast, rotating boom and hanging hook
-const crane = new THREE.Group(); crane.position.set(-6.1,3.7,6); ship.add(crane);
-const pedestal=new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.35,1.3,12),mat(0x354c58));
-pedestal.position.y=.65;pedestal.castShadow=true;crane.add(pedestal);
-const tower=new THREE.Mesh(new THREE.BoxGeometry(1.1,7,1.1),mat(0xf0a64b));
-tower.position.y=4.2;tower.castShadow=true;crane.add(tower);
-const boomPivot=new THREE.Group();boomPivot.position.set(0,7.2,0);crane.add(boomPivot);
-const boom=new THREE.Mesh(new THREE.BoxGeometry(1.05,.9,13),mat(0xe9a94f));
-boom.position.z=-5.4;boom.castShadow=true;boomPivot.add(boom);
-const brace=new THREE.Mesh(new THREE.BoxGeometry(.35,4,.35),mat(0x485f6a));
-brace.position.set(0,-1.2,-4);brace.rotation.x=-.55;boomPivot.add(brace);
-const cable=new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,4,8),mat(0x182c38));
-cable.position.set(0,-2.5,-11.3);boomPivot.add(cable);
-const hook=new THREE.Mesh(new THREE.TorusGeometry(.42,.1,8,16,Math.PI*1.6),mat(0xf0b55f,.35,.5));
-hook.rotation.z=Math.PI;hook.position.set(0,-4.7,-11.3);boomPivot.add(hook);
-const crate=new THREE.Mesh(new THREE.BoxGeometry(2.6,2.4,2.6),mat(0xc18a4c));
-crate.position.set(5,4.85,-19);crate.castShadow=true;crate.receiveShadow=true;ship.add(crate);
-const crateStrap= new THREE.Mesh(new THREE.BoxGeometry(2.7,.12,2.7),mat(0x3a4850));crateStrap.position.set(5,6.1,-19);ship.add(crateStrap);
-
-// Life rings and deck details
-for(const x of [-7.8,7.8]){const ring=new THREE.Mesh(new THREE.TorusGeometry(.48,.13,8,18),mat(0xe5e4d7));ring.position.set(x,4.5,16);ring.rotation.y=Math.PI/2;ship.add(ring);}
-for(let z=-21;z<20;z+=3){const seam=new THREE.Mesh(new THREE.BoxGeometry(15.8,.025,.035),mat(0x655b50));seam.position.set(0,3.64,z);ship.add(seam);}
-
-const player = new THREE.Group();
-const body = new THREE.Mesh(new THREE.CapsuleGeometry(.48,.8,5,10),mat(0xe1a15c));
-body.position.y=1.35;body.castShadow=true;player.add(body);
-const head = new THREE.Mesh(new THREE.SphereGeometry(.34,16,12),mat(0xd9a47d));
-head.position.y=2.15;head.castShadow=true;player.add(head);
-const vest = new THREE.Mesh(new THREE.BoxGeometry(.95,.65,.48),mat(0xe17a36));
-vest.position.y=1.4;player.add(vest);
-const legs = new THREE.Mesh(new THREE.BoxGeometry(.55,.65,.4),mat(0x263d51));
-legs.position.y=.55;player.add(legs);
-player.position.set(0,3.65,-1);
-ship.add(player);
-
-const keys={};
-let yaw=0, pitch=-.12, firstPerson=false, started=false, locked=false;
-let craneActive=false, craneAngle=0, hookHeight=4;
-const clock=new THREE.Clock();
-const raycaster=new THREE.Raycaster();
-const center=new THREE.Vector2(0,0);
-let noticeTimer=0;
-
-function showNotice(text){
-  notice.textContent=text;notice.style.opacity='1';noticeTimer=2.4;
-}
-function setCamera(){
-  cameraLabel.textContent=firstPerson?'FIRST PERSON':'THIRD PERSON';
-}
-function updateCamera(dt){
-  const eye=player.position.clone().add(new THREE.Vector3(0,firstPerson?2.05:2.6,0));
-  const forward=new THREE.Vector3(Math.sin(yaw),0,-Math.cos(yaw));
-  const target=eye.clone().add(forward.multiplyScalar(8));
-  target.y+=Math.sin(pitch)*8;
-  if(firstPerson){
-    camera.position.copy(eye);
-    camera.rotation.order='YXZ';camera.rotation.y=yaw;camera.rotation.x=pitch;
-  }else{
-    const offset=new THREE.Vector3(0,3.3,8.5);
-    offset.applyAxisAngle(new THREE.Vector3(0,1,0),yaw);
-    const desired=eye.clone().add(offset);
-    camera.position.lerp(desired,1-Math.pow(.001,dt));
-    camera.lookAt(target);
-  }
-}
-function nearbyTarget(){
-  const p=player.position;
-  const candidates=[
-    {name:'Ship steering wheel',desc:'Take the helm and steer the Wayfarer',pos:new THREE.Vector3(0,5.7,17),action:'helm'},
-    {name:'Cargo crane controls',desc:'Operate the crane boom and hook',pos:new THREE.Vector3(-6,4,6),action:'crane'},
-    {name:'Important package',desc:'A fragile delivery. Handle with care',pos:new THREE.Vector3(5,5,-19),action:'package'}
-  ];
-  let best=null,dist=4.2;
-  for(const item of candidates){const d=p.distanceTo(item.pos);if(d<dist){dist=d;best=item;}}
-  return best;
-}
-function interact(){
-  const target=nearbyTarget();
-  if(!target){showNotice('Nothing nearby to interact with.');return;}
-  if(target.action==='helm')showNotice('The helm is ready. Ship steering arrives in Stage 3.');
-  if(target.action==='crane'){
-    craneActive=!craneActive;
-    showNotice(craneActive?'Crane controls enabled · Arrow keys rotate · R/F raise or lower hook':'Crane controls released.');
-  }
-  if(target.action==='package')showNotice('PACKAGE STATUS: FRAGILE · Keep it dry and avoid hard impacts.');
-}
-function onKeyDown(e){
-  keys[e.code]=true;
-  if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
-  if(e.code==='KeyC'&&started){firstPerson=!firstPerson;setCamera();}
-  if(e.code==='KeyE'&&started)interact();
-  if(e.code==='Escape'){locked=false;}
-}
-function onKeyUp(e){keys[e.code]=false;}
-addEventListener('keydown',onKeyDown);addEventListener('keyup',onKeyUp);
-renderer.domElement.addEventListener('click',()=>{if(started&&!locked)renderer.domElement.requestPointerLock();});
-document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===renderer.domElement;});
-document.addEventListener('mousemove',e=>{
-  if(!locked)return;
-  yaw-=e.movementX*.0022;
-  pitch=Math.max(-1.0,Math.min(.65,pitch-e.movementY*.0018));
-});
-startButton.addEventListener('click',()=>{
-  started=true;titleCard.classList.add('hidden');hud.classList.remove('hidden');
-  renderer.domElement.requestPointerLock();
-  showNotice('Welcome aboard the Wayfarer. Take a look around.');
-});
-function updatePlayer(dt){
-  if(!started)return;
-  const move=new THREE.Vector3();
-  const forward=new THREE.Vector3(Math.sin(yaw),0,-Math.cos(yaw));
-  const right=new THREE.Vector3(Math.cos(yaw),0,Math.sin(yaw));
-  if(keys.KeyW||keys.ArrowUp)move.add(forward);
-  if(keys.KeyS||keys.ArrowDown)move.sub(forward);
-  if(keys.KeyD||keys.ArrowRight)move.add(right);
-  if(keys.KeyA||keys.ArrowLeft)move.sub(right);
-  if(move.lengthSq()>0){
-    move.normalize().multiplyScalar((keys.ShiftLeft?9:5.2)*dt);
-    player.position.add(move);
-    player.rotation.y=yaw;
-  }
-  // Keep the player on the walkable deck.
-  player.position.x=THREE.MathUtils.clamp(player.position.x,-7.1,7.1);
-  player.position.z=THREE.MathUtils.clamp(player.position.z,-20.3,20.2);
-  player.position.y=3.65;
-  if(craneActive){
-    if(keys.ArrowLeft)craneAngle+=dt*.65;
-    if(keys.ArrowRight)craneAngle-=dt*.65;
-    if(keys.KeyR)hookHeight=Math.max(1,hookHeight-dt*2);
-    if(keys.KeyF)hookHeight=Math.min(8,hookHeight+dt*2);
-    boomPivot.rotation.y=craneAngle;
-    cable.scale.y=hookHeight/4;
-    cable.position.y=7.2-hookHeight/2;
-    hook.position.y=7.2-hookHeight-.2;
-  }
-  const target=nearbyTarget();
-  if(target){
-    prompt.innerHTML='<b>[E]</b> '+target.name+' · '+target.desc;
-    prompt.classList.remove('hidden');
-  }else prompt.classList.add('hidden');
-  headingText.textContent=String(Math.round((THREE.MathUtils.radToDeg(yaw)+360)%360)).padStart(3,'0')+'°';
-}
-function animateWater(t){
-  for(let i=0;i<waterPositions.count;i++){
-    const x=waterBase[i*3],z=waterBase[i*3+2];
-    waterPositions.array[i*3+1]=Math.sin(x*.035+t*1.05)*.42+Math.cos(z*.045+t*.8)*.32+Math.sin((x+z)*.018+t*.55)*.25-1.2;
-  }
-  waterPositions.needsUpdate=true;waterGeo.computeVertexNormals();
-}
-function animate(){
-  requestAnimationFrame(animate);
-  const dt=Math.min(clock.getDelta(),.04),t=clock.elapsedTime;
-  animateWater(t);
-  ship.position.y=Math.sin(t*.8)*.12;
-  ship.rotation.z=Math.sin(t*.65)*.008;
-  ship.rotation.x=Math.sin(t*.52)*.006;
-  updatePlayer(dt);
-  updateCamera(dt);
-  if(noticeTimer>0){noticeTimer-=dt;if(noticeTimer<=0)notice.style.opacity='0';}
-  renderer.render(scene,camera);
-}
-camera.position.set(0,12,35);camera.lookAt(0,3,0);
-animate();
-addEventListener('resize',()=>{
-  camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-});
+function moveCrane(dt){if(!craneMode)return;const speed=12;if(keys.KeyA)trolleyX-=speed*dt;if(keys.KeyD)trolleyX+=speed*dt;if(keys.KeyW)trolleyZ-=speed*dt;if(keys.KeyS)trolleyZ+=speed*dt;if(keys.KeyR)hookY=Math.max(2,hookY-9*dt);if(keys.KeyF)hookY=Math.min(17,hookY+9*dt);trolleyX=THREE.MathUtils.clamp(trolleyX,-29,45);trolleyZ=THREE.MathUtils.clamp(trolleyZ,-32,32);updateCrane();if(attachedCrate){attachedCrate.position.set(trolleyX,21-hookY-1.7,trolleyZ);attachedCrate.rotation.y=0}}
+function cameraUpdate(dt){const eye=player.position.clone().add(new THREE.Vector3(0,firstPerson?2.35:3.1,0));if(firstPerson){camera.position.copy(eye);camera.rotation.order='YXZ';camera.rotation.y=yaw;camera.rotation.x=pitch}else{const offset=new THREE.Vector3(0,4.8,10).applyAxisAngle(new THREE.Vector3(0,1,0),yaw);camera.position.lerp(eye.clone().add(offset),1-Math.pow(.001,dt));const target=eye.clone().add(new THREE.Vector3(Math.sin(yaw)*6,Math.sin(pitch)*5,-Math.cos(yaw)*6));camera.lookAt(target)}}
+function areaLabel(){const x=player.position.x;if(x<-47&&player.position.z<-8&&player.position.z>-34)return ['WAREHOUSE','SPECIAL PACKAGE'];if(x>15)return ['MV WAYFARER','CARGO DECK'];if(craneMode)return ['PORT CRANE','LOADING AREA'];return ['PORT TERMINAL','DOCKSIDE']}
+function tick(){requestAnimationFrame(tick);const dt=Math.min(clock.getDelta(),.04),t=clock.elapsedTime;const pos=waterGeo.attributes.position;for(let i=0;i<pos.count;i++){const x=waterBase[i*3],z=waterBase[i*3+2];pos.array[i*3+1]=Math.sin(x*.04+t)*.28+Math.cos(z*.05+t*.7)*.2}pos.needsUpdate=true;waterGeo.computeVertexNormals();
+ if(started){movePlayer(dt);moveCrane(dt);nearest=craneMode?{action:'crane-controls',label:'Crane controls'}:findTarget();if(craneMode){prompt.classList.remove('hidden');promptText.textContent='W/S bridge · A/D trolley · R/F hook · E attach/release'}else if(nearest){prompt.classList.remove('hidden');promptText.textContent=nearest.label}else prompt.classList.add('hidden');const [a,b]=areaLabel();$('#area-name').textContent=a;$('#coordinates').textContent=b;cameraUpdate(dt)}
+ if(noticeTimer>0){noticeTimer-=dt;if(noticeTimer<=0)message.style.opacity='0'}renderer.render(scene,camera)}
+addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='KeyC'&&started&&!craneMode){firstPerson=!firstPerson;setCamera()}if(e.code==='KeyE'&&started){if(craneMode)attachOrRelease();else interact()}if(e.code==='Escape')locked=false;if(e.code==='KeyF'&&started&&!craneMode)say('Shove: multiplayer player interactions will be added with online play.')});
+addEventListener('keyup',e=>keys[e.code]=false);
+renderer.domElement.addEventListener('click',()=>{if(started&&!locked)renderer.domElement.requestPointerLock()});document.addEventListener('pointerlockchange',()=>locked=document.pointerLockElement===renderer.domElement);document.addEventListener('mousemove',e=>{if(!locked||craneMode)return;yaw-=e.movementX*.0022;pitch=THREE.MathUtils.clamp(pitch-e.movementY*.0018,-.9,.55)});
+$('#start').addEventListener('click',()=>{started=true;intro.classList.add('hidden');hud.classList.remove('hidden');renderer.domElement.requestPointerLock();say('Welcome to the port. Load the four crates and collect the package.')});
+camera.position.set(-78,8,15);camera.lookAt(-60,3,-5);updateObjectives();tick();
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2))});

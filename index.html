@@ -2,53 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#071b2b">
-  <title>Cargo Chaos</title>
+  <title>Cargo Chaos | Port Departure</title>
   <link rel="stylesheet" href="style.css">
   <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
-      }
-    }
+    {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
   </script>
 </head>
 <body>
   <div id="game"></div>
-  <div id="title-card">
-    <div class="eyebrow">CO-OP CARGO ADVENTURE</div>
+  <section id="intro" class="panel">
+    <div class="eyebrow">A CO-OP CARGO ADVENTURE</div>
     <h1>CARGO <span>CHAOS</span></h1>
-    <p>One ship. One very important package. An unreasonable amount of ocean.</p>
-    <button id="start-button">BOARD THE SHIP</button>
-    <small>Stage 1 prototype · Multiplayer is coming in a later stage</small>
-  </div>
+    <p>Your voyage starts here. Load four crates with the port crane, collect the fragile package from the warehouse, then get everything aboard.</p>
+    <div class="intro-facts"><span>01 / LOAD THE SHIP</span><span>02 / FIND THE PACKAGE</span><span>03 / DEPART TOGETHER</span></div>
+    <button id="start">ENTER THE PORT</button>
+    <small>Single-player foundation prototype · Multiplayer comes later</small>
+  </section>
 
   <div id="hud" class="hidden">
-    <div class="hud-top">
-      <div class="ship-name">MV <strong>WAYFARER</strong><small> CARGO VESSEL</small></div>
-      <div class="status"><i></i> ALL SYSTEMS NOMINAL</div>
-    </div>
-    <div class="mission">
-      <span class="eyebrow">CURRENT JOB</span>
-      <strong>Deliver the package</strong>
-      <span>Keep it safe. Try not to sink.</span>
-    </div>
-    <div id="crosshair"></div>
-    <div id="prompt" class="hidden"></div>
-    <div id="notice"></div>
-    <div class="bottom-left">
-      <div class="compass">N <span id="heading">000°</span></div>
-      <div class="location">OPEN OCEAN <span>·</span> WAYFARER</div>
-    </div>
-    <div class="controls">
-      <span><b>W A S D</b> Move</span>
-      <span><b>MOUSE</b> Look</span>
-      <span><b>C</b> Camera</span>
-      <span><b>E</b> Interact</span>
-      <span><b>ESC</b> Pause</span>
-    </div>
-    <div id="camera-label">THIRD PERSON</div>
+    <header><div class="brand">CARGO <b>CHAOS</b><small>PORT DEPARTURE</small></div><div class="ship-state"><i></i> WAYFARER · DOCKED</div></header>
+    <aside class="objectives">
+      <div class="eyebrow">DEPARTURE CHECKLIST</div>
+      <div class="objective" id="crate-objective"><span class="check">01</span><span>Load the four crates</span><b id="crate-count">0 / 4</b></div>
+      <div class="objective" id="package-objective"><span class="check">02</span><span>Collect the special package</span><b id="package-state">NOT COLLECTED</b></div>
+      <div class="objective" id="secure-objective"><span class="check">03</span><span>Secure package aboard</span><b id="secure-state">WAITING</b></div>
+    </aside>
+    <div id="interaction" class="hidden"><kbd>E</kbd><span id="interaction-text">Interact</span></div>
+    <div id="message"></div>
+    <div class="bottom"><div><b id="area-name">PORT TERMINAL</b><span id="coordinates">DOCKSIDE</span></div><div class="key-help"><span><kbd>W A S D</kbd> Walk</span><span><kbd>MOUSE</kbd> Look</span><span><kbd>C</kbd> Camera</span><span><kbd>E</kbd> Interact</span><span><kbd>F</kbd> Shove</span><span><kbd>ESC</kbd> Release mouse</span></div></div>
+    <div id="mode-label">THIRD PERSON</div>
   </div>
   <script type="module" src="game.js"></script>
 </body>
