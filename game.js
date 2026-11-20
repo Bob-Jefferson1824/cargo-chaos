@@ -102,7 +102,7 @@ for(const x of [-3.2,-1.6,0,1.6,3.2])box(craneRoom,'Window mullion',[.12,3.3,.16
 box(craneRoom,'Left observation window',[.12,2.8,5.8],[-4.82,2.3,0],mats.glass);
 box(craneRoom,'Right observation window',[.12,2.8,5.8],[4.82,2.3,0],mats.glass);
 let trapdoorOpen=false;
-const hatchPivot=group(craneRoom,[0,.18,2.35]);
+const hatchPivot=group(craneRoom,[0,.18,1.575]);
 const trapdoor=box(hatchPivot,'Crane tower trapdoor',[3.1,.18,1.55],[0,0,.78],mats.yellow);
 cylinder(hatchPivot,'Trapdoor handle',.07,.07,.25,[1.15,.12,1.25],mats.black,8);
 for(const x of [-.62,.62])box(scene,'Crane ladder side rail',[.18,10.7,.18],[towerX+x,5.25,4.45],mats.steel);
