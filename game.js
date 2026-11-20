@@ -103,7 +103,7 @@ box(craneRoom,'Left observation window',[.12,2.8,5.8],[-4.82,2.3,0],mats.glass);
 box(craneRoom,'Right observation window',[.12,2.8,5.8],[4.82,2.3,0],mats.glass);
 let trapdoorOpen=false;
 const hatchPivot=group(craneRoom,[0,.18,2.35]);
-box(hatchPivot,'Crane tower trapdoor',[3.1,.18,1.55],[0,0,.78],mats.yellow);
+const trapdoor=box(hatchPivot,'Crane tower trapdoor',[3.1,.18,1.55],[0,0,.78],mats.yellow);
 cylinder(hatchPivot,'Trapdoor handle',.07,.07,.25,[1.15,.12,1.25],mats.black,8);
 for(const x of [-.62,.62])box(scene,'Crane ladder side rail',[.18,10.7,.18],[towerX+x,5.25,4.45],mats.steel);
 for(let y=.55;y<=10.1;y+=.72)box(scene,'Crane ladder rung',[1.45,.16,.2],[towerX,y,4.45],mats.yellow);
@@ -186,7 +186,7 @@ function attachOrRelease(){if(attachedCrate){const g=attachedCrate;g.userData.he
  if(chosen){attachedCrate=chosen;chosen.userData.held=true;chosen.userData.heldByCrane=true;say('Crate attached. Lift it slowly and move it over the ship.')}else say('Lower the hook over a crate on the marked staging pads first.')}
 function movePlayer(dt){if(!started||craneMode)return;
  const onLadder=Math.abs(player.position.x-towerX)<1.25&&Math.abs(player.position.z-4.45)<1.15;
- if(onLadder&&(keys.KeyW||keys.KeyS)){
+ if(onLadder&&(keys.KeyW||keys.KeyS)&&!(player.position.y>=towerFloor-.05&&trapdoorOpen&&keys.KeyW)){
   climbingLadder=true;player.userData.velocityY=0;player.position.y=THREE.MathUtils.clamp(player.position.y+(keys.KeyW?1:-1)*5.2*dt,.2,towerFloor);
   if(player.position.y>=towerFloor-.05)player.position.y=towerFloor;
   yaw=0;player.rotation.y=0;
