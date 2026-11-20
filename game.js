@@ -89,7 +89,7 @@ for(const x of [-4.6,4.6])for(const z of [-3.6,3.6])box(craneTower,'Crane tower 
 for(const y of [3.2,6.5,9.8])for(const x of [-4.6,4.6])box(craneTower,'Tower cross beam',[.3,.3,7.4],[x,y,0],mats.steel);
 for(const x of [-4.6,4.6])box(craneTower,'Tower side brace',[.28,9,.28],[x,5,0],mats.steel).rotation.z=x<0?.3:-.3;
 const craneRoom=group(scene,[towerX,towerFloor,towerZ]);
-// Solid floor and an open entrance at the top of the ladder. No hatch or trapdoor.
+// Solid floor and an open entrance at the top of the ladder.
 box(craneRoom,'Control room floor',[10,.3,8],[0,0,0],mats.dark);
 box(craneRoom,'Control room roof',[10,.35,8],[0,4.35,0],mats.dark);
 box(craneRoom,'Control room rear wall',[.3,4.2,8],[-4.85,2.1,0],mats.dark);
@@ -167,7 +167,7 @@ const keys={};const clock=new THREE.Clock();let nearest=null;
 function say(text){message.textContent=text;message.style.opacity='1';noticeTimer=2.7}
 function updateObjectives(){const count=crates.filter(c=>c.userData.loaded).length;$('#crate-count').textContent=count+' / 4';$('#crate-objective').classList.toggle('done',count===4);$('#package-state').textContent=packageCollected?'COLLECTED':'NOT COLLECTED';$('#package-objective').classList.toggle('done',packageCollected);$('#secure-state').textContent=packageSecured?'SECURED':'WAITING';$('#secure-objective').classList.toggle('done',packageSecured)}
 function shipDeckAt(x,z){return x>19&&x<47&&Math.abs(z)<35}
-function playerHeight(){const x=player.position.x,z=player.position.z;if(x>towerX-5&&x<towerX+5&&z>-4&&z<4)return towerFloor;if(shipDeckAt(x,z))return 4.75;if(x>14&&x<21&&z>27&&z<35){const t=THREE.MathUtils.clamp((x-14)/7,0,1);return t*4.75+.2}return .2}
+function playerHeight(){const x=player.position.x,z=player.position.z;if(x>towerX-5&&x<towerX+5&&z>-5.5&&z<5.5&&player.position.y>9.5)return towerFloor;if(shipDeckAt(x,z))return 4.75;if(x>14&&x<21&&z>27&&z<35){const t=THREE.MathUtils.clamp((x-14)/7,0,1);return t*4.75+.2}return .2}
 function findTarget(){const p=player.position;let best=null,bestD=5.2;const near=(obj,pos,dist,action,label)=>{const d=p.distanceTo(new THREE.Vector3(...pos));if(d<dist&&d<bestD){bestD=d;best={obj,action,label,d}}};
  if(!packageCollected&&!packageSecured)near(packageMesh,[-61,1,-14],5.5,'package','Collect the special package');
  if(packageCollected&&!packageSecured&&shipDeckAt(p.x,p.z)&&Math.abs(p.x-33)<10&&Math.abs(p.z)<10)near(ship,[33,5,0],7,'secure','Secure the special package aboard');
@@ -188,7 +188,7 @@ function attachOrRelease(){if(attachedCrate){const g=attachedCrate;g.userData.he
  if(chosen){attachedCrate=chosen;chosen.userData.held=true;chosen.userData.heldByCrane=true;say('Crate attached. Lift it slowly and move it over the ship.')}else say('Lower the hook over a crate on the marked staging pads first.')}
 function movePlayer(dt){if(!started||craneMode)return;
  const onLadder=Math.abs(player.position.x-towerX)<1.25&&Math.abs(player.position.z-4.45)<1.15;
- if(onLadder&&((keys.KeyW&&player.position.y<towerFloor-.05)||(keys.KeyS&&player.position.y>.2)){
+ if(onLadder&&((keys.KeyW&&player.position.y<towerFloor-.05)||(keys.KeyS&&player.position.y>.2))){
   climbingLadder=true;player.userData.velocityY=0;player.position.y=THREE.MathUtils.clamp(player.position.y+(keys.KeyW?1:-1)*5.2*dt,.2,towerFloor);
   if(player.position.y>=towerFloor-.05)player.position.y=towerFloor;
   yaw=0;player.rotation.y=0;
