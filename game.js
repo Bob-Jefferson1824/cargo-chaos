@@ -92,7 +92,10 @@ const craneRoom=group(scene,[towerX,towerFloor,towerZ]);
 // Solid floor and an open entrance at the top of the ladder.
 box(craneRoom,'Control room floor',[10,.3,8],[0,0,0],mats.dark);
 box(craneRoom,'Control room roof',[10,.35,8],[0,4.35,0],mats.dark);
-box(craneRoom,'Control room rear wall',[.3,4.2,8],[-4.85,2.1,0],mats.dark);
+box(craneRoom,'Rear wall left pier',[.3,4.2,1.1],[-4.85,2.1,-3.45],mats.dark);
+box(craneRoom,'Rear wall right pier',[.3,4.2,1.1],[-4.85,2.1,3.45],mats.dark);
+box(craneRoom,'Rear window lower frame',[.3,.45,5.8],[-4.85,.45,0],mats.yellow);
+box(craneRoom,'Rear window upper frame',[.3,.45,5.8],[-4.85,3.95,0],mats.yellow);
 box(craneRoom,'Control room back wall',[9.7,4.2,.3],[0,2.1,-3.85],mats.dark);
 box(craneRoom,'Front wall left pier',[3.8,4.2,.3],[-3.0,2.1,3.85],mats.dark);
 box(craneRoom,'Front wall right pier',[3.8,4.2,.3],[3.0,2.1,3.85],mats.dark);
