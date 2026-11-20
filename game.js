@@ -73,7 +73,7 @@ box(ship,'Cargo bay marking',[8,.04,8],[0,4.73,0],mats.yellow,{cast:false});
 box(ship,'Package securing platform',[4,.18,4],[0,4.85,0],mats.dark);
 for(let x of [-2,2])for(let z of [-2,2])cylinder(ship,'Package tie-down',.16,.16,.35,[x,5.05,z],mats.yellow,8);
 // gangway from dock onto ship
-const ramp=box(scene,'Boarding gangway',[14,.55,5],[12,2.05,31],material(0x9a9c91));ramp.rotation.z=-.2;
+const ramp=box(scene,'Boarding gangway',[14,.55,5],[12,2.05,31],material(0x9a9c91));ramp.position.y=2.5;ramp.rotation.z=.32;
 for(let x=6;x<=18;x+=2)box(scene,'Gangway handrail',[.14,1.15,.14],[x,2.9,28.6],mats.white);
 
 // Massive shore gantry crane spanning the cargo loading area
@@ -88,7 +88,7 @@ box(trolley,'Trolley housing',[4,2.2,4],[0,0,0],mats.dark);
 const cable=cylinder(trolley,'Crane cable',.09,.09,7,[0,-4.4,0],mats.black,8);
 const hook= new THREE.Mesh(new THREE.TorusGeometry(.65,.16,8,16,Math.PI*1.65),mats.yellow);hook.rotation.z=Math.PI;hook.position.set(0,-8.2,0);trolley.add(hook);
 let trolleyX=8,trolleyZ=0,hookY=8,craneMode=false,attachedCrate=null;
-function updateCrane(){trolley.position.set(trolleyX,21,trolleyZ);cable.scale.y=hookY/7;cable.position.y=-hookY/2;hook.position.y=-hookY-.3;}
+function updateCrane(){bridge.position.z=trolleyZ;trolley.position.set(trolleyX,21,trolleyZ);cable.scale.y=hookY/7;cable.position.y=-hookY/2;hook.position.y=-hookY-.3;}
 updateCrane();
 
 // Dock details: bollards, lights, pallets, parked equipment
