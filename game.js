@@ -88,7 +88,7 @@ box(trolley,'Trolley housing',[4,2.2,4],[0,0,0],mats.dark);
 const cable=cylinder(trolley,'Crane cable',.09,.09,7,[0,-4.4,0],mats.black,8);
 const hook= new THREE.Mesh(new THREE.TorusGeometry(.65,.16,8,16,Math.PI*1.65),mats.yellow);hook.rotation.z=Math.PI;hook.position.set(0,-8.2,0);trolley.add(hook);
 let trolleyX=8,trolleyZ=0,hookY=8,craneMode=false,attachedCrate=null;
-function updateCrane(){trolley.position.set(trolleyX,21-hookY,trolleyZ);cable.scale.y=hookY/7;cable.position.y=-hookY/2;hook.position.y=-hookY-.3;}
+function updateCrane(){trolley.position.set(trolleyX,21,trolleyZ);cable.scale.y=hookY/7;cable.position.y=-hookY/2;hook.position.y=-hookY-.3;}
 updateCrane();
 
 // Dock details: bollards, lights, pallets, parked equipment
@@ -125,11 +125,11 @@ function interact(){if(!nearest){say('Nothing close enough to interact with.');r
  if(nearest.action==='secure'){packageSecured=true;heldVisual.visible=false;packageMesh.position.set(29,5.1,0);packageMesh.visible=true;packageMesh.scale.set(.9,.9,.9);updateObjectives();say('Package secured! Keep it safe until delivery.');return}
  if(nearest.action==='crate'){say('Use the large port crane to lift this crate onto the ship.');return}
 }
-function attachOrRelease(){if(attachedCrate){const g=attachedCrate;g.userData.held=false;g.userData.heldByCrane=false;g.position.set(trolleyX,Math.max(.1,21-hookY-1.7),trolleyZ);if(trolleyX>15&&trolleyX<43&&Math.abs(trolleyZ)<33&&hookY<14){g.userData.loaded=true;g.position.set(trolleyX,5.0,trolleyZ);g.rotation.y=0;say('Crate '+(g.userData.index+1)+' loaded aboard!');}else{g.position.y=1.6;say('Crate set down on the dock. Move it over the ship to load it.')}attachedCrate=null;updateObjectives();return}
- const candidates=crates.filter(c=>!c.userData.loaded&&!c.userData.held);let chosen=null,distance=4.3;for(const c of candidates){const d=Math.hypot(c.position.x-trolleyX,c.position.z-trolleyZ);if(d<distance&&hookY>13){chosen=c;distance=d}}
+function attachOrRelease(){if(attachedCrate){const g=attachedCrate;g.userData.held=false;g.userData.heldByCrane=false;g.position.set(trolleyX,Math.max(.1,21-hookY-1.7),trolleyZ);if(trolleyX>15&&trolleyX<43&&Math.abs(trolleyZ)<33&&hookY<14){g.userData.loaded=true;g.position.set(trolleyX,6.4,trolleyZ);g.rotation.y=0;say('Crate '+(g.userData.index+1)+' loaded aboard!');}else{g.position.y=1.6;say('Crate set down on the dock. Move it over the ship to load it.')}attachedCrate=null;updateObjectives();return}
+ const candidates=crates.filter(c=>!c.userData.loaded&&!c.userData.held);let chosen=null,distance=4.3;for(const c of candidates){const d=Math.hypot(c.position.x-trolleyX,c.position.z-trolleyZ);if(d<distance&&hookY>15.5){chosen=c;distance=d}}
  if(chosen){attachedCrate=chosen;chosen.userData.held=true;chosen.userData.heldByCrane=true;say('Crate attached. Lift it slowly and move it over the ship.')}else say('Lower the hook over a crate on the marked staging pads first.')}
 function movePlayer(dt){if(!started)return;const move=new THREE.Vector3();const forward=new THREE.Vector3(Math.sin(yaw),0,-Math.cos(yaw)),right=new THREE.Vector3(Math.cos(yaw),0,Math.sin(yaw));if(keys.KeyW)move.add(forward);if(keys.KeyS)move.sub(forward);if(keys.KeyD)move.add(right);if(keys.KeyA)move.sub(right);if(move.lengthSq()){move.normalize().multiplyScalar((keys.ShiftLeft?9:6.2)*dt);player.position.add(move);player.rotation.y=yaw;walking+=dt*10;legL.rotation.x=Math.sin(walking)*.55;legR.rotation.x=-Math.sin(walking)*.55}
- player.position.x=THREE.MathUtils.clamp(player.position.x,-112,17.8);player.position.z=THREE.MathUtils.clamp(player.position.z,-58,58);
+ player.position.x=THREE.MathUtils.clamp(player.position.x,-112,43);player.position.z=THREE.MathUtils.clamp(player.position.z,-58,58);
  // Do not walk into the warehouse walls; its front doorway is left open.
  if(player.position.x>-48&&player.position.x<-43&&player.position.z>-31&&player.position.z<-9){player.position.x=-48}
  // The quay is a solid edge except at the boarding ramp.
@@ -137,7 +137,7 @@ function movePlayer(dt){if(!started)return;const move=new THREE.Vector3();const 
  player.position.y=playerHeight();
  if(packageCollected&&!packageSecured){heldVisual.position.set(0,1.45,-1.05)}
 }
-function moveCrane(dt){if(!craneMode)return;const speed=12;if(keys.KeyA)trolleyX-=speed*dt;if(keys.KeyD)trolleyX+=speed*dt;if(keys.KeyW)trolleyZ-=speed*dt;if(keys.KeyS)trolleyZ+=speed*dt;if(keys.KeyR)hookY=Math.max(2,hookY-9*dt);if(keys.KeyF)hookY=Math.min(17,hookY+9*dt);trolleyX=THREE.MathUtils.clamp(trolleyX,-29,45);trolleyZ=THREE.MathUtils.clamp(trolleyZ,-32,32);updateCrane();if(attachedCrate){attachedCrate.position.set(trolleyX,21-hookY-1.7,trolleyZ);attachedCrate.rotation.y=0}}
+function moveCrane(dt){if(!craneMode)return;const speed=12;if(keys.KeyA)trolleyX-=speed*dt;if(keys.KeyD)trolleyX+=speed*dt;if(keys.KeyW)trolleyZ-=speed*dt;if(keys.KeyS)trolleyZ+=speed*dt;if(keys.KeyR)hookY=Math.min(17,hookY+9*dt);if(keys.KeyF)hookY=Math.max(2,hookY-9*dt);trolleyX=THREE.MathUtils.clamp(trolleyX,-29,45);trolleyZ=THREE.MathUtils.clamp(trolleyZ,-32,32);updateCrane();if(attachedCrate){attachedCrate.position.set(trolleyX,22.2-hookY,trolleyZ);attachedCrate.rotation.y=0}}
 function cameraUpdate(dt){const eye=player.position.clone().add(new THREE.Vector3(0,firstPerson?2.35:3.1,0));if(firstPerson){camera.position.copy(eye);camera.rotation.order='YXZ';camera.rotation.y=yaw;camera.rotation.x=pitch}else{const offset=new THREE.Vector3(0,4.8,10).applyAxisAngle(new THREE.Vector3(0,1,0),yaw);camera.position.lerp(eye.clone().add(offset),1-Math.pow(.001,dt));const target=eye.clone().add(new THREE.Vector3(Math.sin(yaw)*6,Math.sin(pitch)*5,-Math.cos(yaw)*6));camera.lookAt(target)}}
 function areaLabel(){const x=player.position.x;if(x<-47&&player.position.z<-8&&player.position.z>-34)return ['WAREHOUSE','SPECIAL PACKAGE'];if(x>15)return ['MV WAYFARER','CARGO DECK'];if(craneMode)return ['PORT CRANE','LOADING AREA'];return ['PORT TERMINAL','DOCKSIDE']}
 function tick(){requestAnimationFrame(tick);const dt=Math.min(clock.getDelta(),.04),t=clock.elapsedTime;const pos=waterGeo.attributes.position;for(let i=0;i<pos.count;i++){const x=waterBase[i*3],z=waterBase[i*3+2];pos.array[i*3+1]=Math.sin(x*.04+t)*.28+Math.cos(z*.05+t*.7)*.2}pos.needsUpdate=true;waterGeo.computeVertexNormals();
