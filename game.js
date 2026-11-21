@@ -59,21 +59,21 @@ for(let i=0;i<4;i++){
 
 // The larger docked cargo vessel
 const ship=group(scene,[33,0,0]);ship.userData.isShip=true;
-const hull=box(ship,'Cargo ship hull',[34,8,90],[0,0,0],material(0x263f50,.48,.22));hull.position.y=0;
-const bow= new THREE.Mesh(new THREE.ConeGeometry(17,18,4),material(0x263f50,.48,.2));bow.rotation.x=Math.PI/2;bow.rotation.z=Math.PI/4;bow.scale.set(1,.55,1);bow.position.set(0,-.3,-51);bow.castShadow=true;ship.add(bow);
-box(ship,'Red waterline stripe',[34,.65,90],[0,-3.5,0],mats.red);
-box(ship,'Main deck',[33,.7,88],[0,4.35,0],material(0x9b927e));
-box(ship,'Deck edge trim',[35,.3,89],[0,4.0,0],mats.white);
-for(let side of [-1,1]){box(ship,'Ship rail',[.28,1.35,84],[side*16.25,5.2,0],mats.white);for(let z=-40;z<=40;z+=4)cylinder(ship,'Rail stanchion',.09,.09,1.4,[side*16.25,5.2,z],mats.steel,8)}
+const hull=box(ship,'Cargo ship hull',[42,8,108],[0,0,0],material(0x263f50,.48,.22));hull.position.y=0;
+const bow= new THREE.Mesh(new THREE.ConeGeometry(21,22,4),material(0x263f50,.48,.2));bow.rotation.x=Math.PI/2;bow.rotation.z=Math.PI/4;bow.scale.set(1,.55,1);bow.position.set(0,-.3,-61);bow.castShadow=true;ship.add(bow);
+box(ship,'Red waterline stripe',[42,.65,108],[0,-3.5,0],mats.red);
+box(ship,'Main deck',[41,.7,104],[0,4.35,0],material(0x9b927e));
+box(ship,'Deck edge trim',[43,.3,105],[0,4.0,0],mats.white);
+for(let side of [-1,1]){box(ship,'Ship rail',[.28,1.35,100],[side*20.25,5.2,0],mats.white);for(let z=-48;z<=48;z+=4)cylinder(ship,'Rail stanchion',.09,.09,1.4,[side*20.25,5.2,z],mats.steel,8)}
 // Empty cargo deck: all cargo must be loaded by the players at the port.
 // Bridge and windows at stern
-box(ship,'Bridge lower deck',[17,5,12],[0,7.2,28],mats.white);
-box(ship,'Bridge glazing',[17.2,2.3,12.1],[0,8.4,28],mats.glass);
-box(ship,'Bridge roof',[18,.7,13],[0,9.9,28],mats.yellow);
-for(let x=-7;x<=7;x+=2.8)box(ship,'Bridge window mullion',[.18,2.4,.18],[x,8.4,21.95],mats.dark);
-cylinder(ship,'Ship mast',.22,.3,8,[0,14,28],mats.white);
-for(let i=0;i<3;i++)box(ship,'Mast antenna',[3,.12,.12],[0,15+i*.55,28],mats.dark);
-box(ship,'Funnel',[4,8,5],[7,13,15],mats.red);box(ship,'Funnel cap',[4.3,.7,5.3],[7,17.2,15],mats.dark);
+box(ship,'Bridge lower deck',[21,5.5,15],[0,7.45,31],mats.white);
+box(ship,'Bridge glazing',[21.2,2.7,15.1],[0,8.65,31],mats.glass);
+box(ship,'Bridge roof',[22,.7,16],[0,10.35,31],mats.yellow);
+for(let x=-9;x<=9;x+=3)box(ship,'Bridge window mullion',[.18,2.8,.18],[x,8.65,23.45],mats.dark);
+cylinder(ship,'Ship mast',.22,.3,9,[0,15,31],mats.white);
+for(let i=0;i<3;i++)box(ship,'Mast antenna',[3,.12,.12],[0,16+i*.55,31],mats.dark);
+box(ship,'Funnel',[5,9,6],[9,14,17],mats.red);box(ship,'Funnel cap',[5.3,.7,6.3],[9,18.7,17],mats.dark);
 // Deck markings and package bay
 box(ship,'Cargo bay marking',[8,.04,8],[0,4.73,0],mats.yellow,{cast:false});
 box(ship,'Package securing platform',[4,.18,4],[0,4.85,0],mats.dark);
@@ -170,7 +170,7 @@ let climbingLadder=false;
 const keys={};const clock=new THREE.Clock();let nearest=null;
 function say(text){message.textContent=text;message.style.opacity='1';noticeTimer=2.7}
 function updateObjectives(){const count=crates.filter(c=>c.userData.loaded).length;$('#crate-count').textContent=count+' / 4';$('#crate-objective').classList.toggle('done',count===4);$('#package-state').textContent=packageCollected?'COLLECTED':'NOT COLLECTED';$('#package-objective').classList.toggle('done',packageCollected);$('#secure-state').textContent=packageSecured?'SECURED':'WAITING';$('#secure-objective').classList.toggle('done',packageSecured)}
-function shipDeckAt(x,z){return x>16.5&&x<49.5&&Math.abs(z)<43}
+function shipDeckAt(x,z){return x>12&&x<54&&Math.abs(z)<52}
 function playerHeight(){const x=player.position.x,z=player.position.z;if(x>towerX-5&&x<towerX+5&&z>-5.5&&z<5.5&&player.position.y>9.5)return towerFloor;if(shipDeckAt(x,z))return 4.75;if(x>14&&x<21&&z>27&&z<35){const t=THREE.MathUtils.clamp((x-14)/7,0,1);return t*4.75+.2}return .2}
 function findTarget(){const p=player.position;let best=null,bestD=5.2;const near=(obj,pos,dist,action,label)=>{const d=p.distanceTo(new THREE.Vector3(...pos));if(d<dist&&d<bestD){bestD=d;best={obj,action,label,d}}};
  if(!packageCollected&&!packageSecured)near(packageMesh,[-61,1,-14],5.5,'package','Collect the special package');
@@ -187,7 +187,7 @@ function interact(){if(!nearest){say('Nothing close enough to interact with.');r
  if(nearest.action==='secure'){packageSecured=true;heldVisual.visible=false;packageMesh.position.set(33,5.1,0);packageMesh.visible=true;packageMesh.scale.set(.9,.9,.9);updateObjectives();say('Package secured! Keep it safe until delivery.');return}
  if(nearest.action==='crate'){say('Use the large port crane to lift this crate onto the ship.');return}
 }
-function attachOrRelease(){if(attachedCrate){const g=attachedCrate,target=craneBayPositions[g.userData.bayIndex],onShipDeck=trolleyX>19&&trolleyX<47&&Math.abs(trolleyZ)<35,distanceToBay=Math.hypot(trolleyX-(33+target.x),trolleyZ-target.z);if(onShipDeck&&hookY<17.8){say('Lower the hook until the crate is down at deck level before releasing it.');return}g.userData.held=false;g.userData.heldByCrane=false;if(onShipDeck){if(distanceToBay<=5.2){g.userData.loaded=true;g.position.set(33+target.x,4.75,target.z);g.rotation.set(0,0,0);say('Crate lowered and snapped into its matching '+craneBayNames[g.userData.bayIndex]+' bay.')}else{g.position.set(trolleyX,4.75,trolleyZ);g.rotation.set(0,0,0);say('Crate lowered onto the deck. Move it closer to its matching coloured bay to snap it into place.')}}else{g.position.set(trolleyX,.12,trolleyZ);g.rotation.set(0,0,0);say('Crate set down on the dock. Move it over the ship deck to load it.')}attachedCrate=null;updateObjectives();return}
+function attachOrRelease(){if(attachedCrate){const g=attachedCrate,target=craneBayPositions[g.userData.bayIndex],onShipDeck=trolleyX>14&&trolleyX<52&&Math.abs(trolleyZ)<50,distanceToBay=Math.hypot(trolleyX-(33+target.x),trolleyZ-target.z);if(onShipDeck&&hookY<17.8){say('Lower the hook until the crate is down at deck level before releasing it.');return}g.userData.held=false;g.userData.heldByCrane=false;if(onShipDeck){if(distanceToBay<=5.2){g.userData.loaded=true;g.position.set(33+target.x,4.75,target.z);g.rotation.set(0,0,0);say('Crate lowered and snapped into its matching '+craneBayNames[g.userData.bayIndex]+' bay.')}else{g.position.set(trolleyX,4.75,trolleyZ);g.rotation.set(0,0,0);say('Crate lowered onto the deck. Move it closer to its matching coloured bay to snap it into place.')}}else{g.position.set(trolleyX,.12,trolleyZ);g.rotation.set(0,0,0);say('Crate set down on the dock. Move it over the ship deck to load it.')}attachedCrate=null;updateObjectives();return}
  const candidates=crates.filter(c=>!c.userData.loaded&&!c.userData.held);let chosen=null,distance=5.2;for(const c of candidates){const d=Math.hypot(c.position.x-trolleyX,c.position.z-trolleyZ);if(d<distance&&hookY>17.4){chosen=c;distance=d}}
  if(chosen){attachedCrate=chosen;chosen.userData.held=true;chosen.userData.heldByCrane=true;say('Crate attached. Lift it and line it up with its matching coloured bay in the 2x2 layout.')}else say('Lower the hook over a crate on the marked staging pads first.')}
 function movePlayer(dt){if(!started||craneMode)return;
@@ -203,7 +203,7 @@ function movePlayer(dt){if(!started||craneMode)return;
   player.rotation.y=yaw;
 
   if(move.lengthSq()){move.normalize().multiplyScalar((keys.ShiftLeft?7.2:5.2)*dt);player.position.add(move);walking+=dt*10;legL.rotation.x=Math.sin(walking)*.55;legR.rotation.x=-Math.sin(walking)*.55;armL.rotation.x=-Math.sin(walking)*.32;armR.rotation.x=Math.sin(walking)*.32}
-  if(!adminNoclip){player.position.x=THREE.MathUtils.clamp(player.position.x,-112,51);player.position.z=THREE.MathUtils.clamp(player.position.z,-62,62);}
+  if(!adminNoclip){player.position.x=THREE.MathUtils.clamp(player.position.x,-112,56);player.position.z=THREE.MathUtils.clamp(player.position.z,-72,72);}
   if(player.position.x>-48&&player.position.x<-43&&player.position.z>-31&&player.position.z<-9)player.position.x=-48;
   if(!adminNoclip&&player.position.x>17.8&&player.position.x<19&&!shipDeckAt(player.position.x,player.position.z)&&!(player.position.z>27&&player.position.z<35))player.position.x=17.8;
   const floor=playerHeight(),vy=player.userData.velocityY||0;
