@@ -154,7 +154,7 @@ box(accommodationProps,'Galley worktop',[6,.18,1.5],[-9,-.31,18],mats.steel);
 box(accommodationProps,'Galley sink',[1.2,.12,.8],[-10,-.34,18],mats.dark);
 box(accommodationProps,'Mess table',[4,.25,2],[-8,-1.375,10],mats.wood);
 for(const x of [-10,-6])for(const z of [8,12])box(accommodationProps,'Mess bench',[.65,.55,2],[x,-1.225,z],mats.wood);
-for(const x of [7,11]){box(accommodationProps,'Crew bunk frame',[3,.25,6],[x,-1.375,17],mats.dark);box(accommodationProps,'Crew mattress',[2.8,.3,5.7],[x,-1.1,17],material(0x9eb5b6));box(accommodationProps,'Crew bunk upper frame',[3,.2,6],[x,.25,17],mats.dark);box(accommodationProps,'Crew bunk upper mattress',[2.8,.25,5.7],[x,.48,17],material(0x9eb5b6))}
+for(const x of [7,11]){box(accommodationProps,'Crew bunk frame',[3,.25,6],[x,-1.375,17],mats.dark);box(accommodationProps,'Crew mattress',[2.8,.3,5.7],[x,-1.1,17],material(0x9eb5b6));for(const dx of [-1.32,1.32])for(const dz of [-2.65,2.65])box(accommodationProps,'Upper bunk support post',[.16,1.55,.16],[x+dx,-.575,17+dz],mats.dark);box(accommodationProps,'Crew bunk upper frame',[3,.2,6],[x,.25,17],mats.dark);box(accommodationProps,'Crew bunk upper mattress',[2.8,.25,5.7],[x,.48,17],material(0x9eb5b6))}
 box(ship,'Infirmary partition',[.3,4.4,10],[4,.75,-2],interiorWall);
 for(const z of [-5,1]){box(accommodationProps,'Infirmary bed frame',[2.2,.35,4],[8,-1.325,z],mats.white);box(accommodationProps,'Infirmary mattress',[2.1,.25,3.8],[8,-1.025,z],material(0xd8e0dc));box(accommodationProps,'Infirmary pillow',[1.3,.25,.8],[8,-.845,z-1.35],mats.white)}
 box(ship,'Captain cabin partition',[.3,4.4,12],[-4,.75,-1],interiorWall);
@@ -166,7 +166,7 @@ for(const x of [-8,0,8]){
  for(let z=5;z<=11;z+=2)cylinder(ship,'Engine cylinder',.65,.65,1.1,[x,-3.2,z],mats.steel,12);
  box(ship,'Engine warning stripe',[4.1,.16,.3],[x,-3.35,4],mats.yellow);
 }
-for(const x of [-11,-5,5,11]){cylinder(ship,'Engine pipe',.22,.22,28,[x,-5.2,8],mats.yellow,10).rotation.x=Math.PI/2;for(const z of [-7,0,7,14,21])box(ship,'Pipe support',[.4,.3,.4],[x,-6.25,z],mats.steel)}
+for(const x of [-11,-3.5,5,11]){cylinder(ship,'Engine pipe',.22,.22,28,[x,-5.2,8],mats.yellow,10).rotation.x=Math.PI/2;for(const z of [-7,0,7,14,21])box(ship,'Pipe support',[.4,.3,.4],[x,-6.25,z],mats.steel)}
 box(ship,'Engine control panel',[5,2.2,.6],[0,-5.1,-10],mats.dark);
 for(let x=-1.7;x<=1.7;x+=.85){cylinder(ship,'Engine gauge',.28,.28,.12,[x,-4.45,-10],mats.glass,16);box(ship,'Engine control lever',[.12,.8,.12],[x,-5.1,-9.5],mats.yellow)}
 // Warm practical lighting makes the lower decks readable when the player enters.
