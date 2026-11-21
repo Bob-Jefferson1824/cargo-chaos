@@ -140,11 +140,11 @@ for(let i=0;i<3;i++)box(ship,'Mast antenna',[3,.12,.12],[0,22+i*.55,37.5],mats.d
 box(ship,'Funnel',[5,9,6],[9,14,17],mats.red);box(ship,'Funnel cap',[5.3,.7,6.3],[9,18.7,17],mats.dark);
 for(const side of [-1,1]){box(ship,'Funnel exhaust brace',[.35,5,.35],[side*3,12.5,17],mats.steel)}
 // Two lower internal decks inside the extended hull.
-makeDeckPlate(ship,'Accommodation deck floor with engine stair opening',-14.5,14.5,-11,27,-1.5,[[-9,-5,12,28]],floorMat);
-box(ship,'Engine room floor',[29,.45,39],[0,-6.8,8],floorMat);
-makeDeckPlate(ship,'Accommodation ceiling with stairwell opening',-14.5,14.5,-11,27,3.05,[[-9,-5,12,28]],interiorTrim);
-box(ship,'Engine room ceiling',[29,.35,39],[0,-4.05,8],interiorTrim);
-for(const x of [-14.2,14.2]){box(ship,'Accommodation outer bulkhead',[.5,4.6,39],[x,.75,8],interiorWall);box(ship,'Engine room outer bulkhead',[.5,5.1,39],[x,-3.8,8],interiorTrim)}
+makeDeckPlate(ship,'Accommodation deck floor with engine ladder opening',-14.5,14.5,-11,28.5,-1.5,[[-9,-5,12,28]],floorMat);
+box(ship,'Engine room floor',[29,.45,40],[0,-6.8,8.5],floorMat);
+makeDeckPlate(ship,'Accommodation ceiling with ladder opening',-14.5,14.5,-11,28.5,3.05,[[-9,-5,12,28]],interiorTrim);
+makeDeckPlate(ship,'Engine room ceiling with ladder opening',-14.5,14.5,-11,28.5,-4.05,[[-8.5,-5.5,18,22]],interiorTrim);
+for(const x of [-14.2,14.2]){box(ship,'Accommodation outer bulkhead',[.5,4.6,40],[x,.75,8.5],interiorWall);box(ship,'Engine room outer bulkhead',[.5,5.1,40],[x,-3.8,8.5],interiorTrim)}
 // Accommodation rooms: galley, infirmary, crew bunks and captain's cabin.
 const accommodationProps=group(ship,[0,0,0]);
 box(ship,'Crew corridor partition',[.35,4.4,27],[0,.75,8],interiorWall);
@@ -289,7 +289,7 @@ function playerHeight(){const x=player.position.x,z=player.position.z,sx=x-33;
  const crewStair=accommodationStairHeight(x,z);if(crewStair!==null)return crewStair;
  if(sx>5&&sx<9&&z>=29&&z<=44)return 4.35+(44-z)/15*6.6;
  if(sx>-9&&sx<9&&z>28.5&&z<46.5&&player.position.y>9.5)return 10.95;
- if(sx>-14.5&&sx<14.5&&z>=-11&&z<=27.5)return player.position.y<-4.1?-6.575:-1.5;
+ if(sx>-14.5&&sx<14.5&&z>=-11&&z<=28.5)return player.position.y<-4.1?-6.575:-1.5;
  if(shipDeckAt(x,z))return 4.35;
  if(x>=-15&&x<=8.5&&Math.abs(z)<=46)return .5;
  return .2
