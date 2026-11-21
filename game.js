@@ -142,8 +142,7 @@ for(const side of [-1,1]){box(ship,'Funnel exhaust brace',[.35,5,.35],[side*3,12
 // Two lower internal decks inside the extended hull.
 makeDeckPlate(ship,'Accommodation deck floor with engine ladder opening',-14.5,14.5,-11,28.5,-1.5,[[-9,-5,12,28]],floorMat);
 box(ship,'Engine room floor',[29,.45,40],[0,-6.8,8.5],floorMat);
-makeDeckPlate(ship,'Accommodation ceiling with ladder opening',-14.5,14.5,-11,28.5,3.05,[[-9,-5,12,28]],interiorTrim);
-makeDeckPlate(ship,'Engine room ceiling with ladder opening',-14.5,14.5,-11,28.5,-4.05,[[-8.5,-5.5,18,22]],interiorTrim);
+makeDeckPlate(ship,'Accommodation ceiling with open stairwell',-14.5,14.5,-11,28.5,3.05,[[-9.5,-4.5,28,44]],interiorTrim);
 for(const x of [-14.2,14.2]){box(ship,'Accommodation outer bulkhead',[.5,4.6,40],[x,.75,8.5],interiorWall);box(ship,'Engine room outer bulkhead',[.5,5.1,40],[x,-3.8,8.5],interiorTrim)}
 // Accommodation rooms: galley, infirmary, crew bunks and captain's cabin.
 const accommodationProps=group(ship,[0,0,0]);
@@ -175,18 +174,26 @@ for(const [x,y,z,intensity,distance] of [[0,-.35,22,2.2,24],[-9,-.35,9,1.5,16],[
  const light=new THREE.PointLight(0xffd5a0,intensity,distance);light.position.set(x,y,z);ship.add(light)
 }
 // Stair flights and landings: starboard goes up to the bridge; port descends to both lower decks.
+function beamBetween(parent,name,start,end,width,mat){
+ const a=new THREE.Vector3(...start),b=new THREE.Vector3(...end),delta=b.clone().sub(a);
+ const beam=new THREE.Mesh(new THREE.BoxGeometry(width,delta.length(),width),mat);beam.name=name;beam.position.copy(a.add(b).multiplyScalar(.5));beam.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),delta.normalize());beam.castShadow=true;beam.receiveShadow=true;parent.add(beam);return beam;
+}
 function stairFlight(x,zStart,zEnd,yStart,yEnd,count,label){
- const stepDepth=Math.abs(zEnd-zStart)/count;
- for(let i=0;i<count;i++){const t=(i+.5)/count,z=zStart+(zEnd-zStart)*t,y=yStart+(yEnd-yStart)*t;box(ship,label+' stair tread',[3.8,.22,stepDepth+.08],[x,y,z],mats.wood);box(ship,label+' stair riser',[3.8,.3,.16],[x,y-.16,z+(zEnd<zStart?stepDepth/2:-stepDepth/2)],mats.wood)}
- box(ship,label+' stair handrail',[.12,.12,Math.abs(zEnd-zStart)],[x-2.05,(yStart+yEnd)/2+1,(zStart+zEnd)/2],mats.steel);
- box(ship,label+' stair handrail',[.12,.12,Math.abs(zEnd-zStart)],[x+2.05,(yStart+yEnd)/2+1,(zStart+zEnd)/2],mats.steel);
+ const stepDepth=Math.abs(zEnd-zStart)/count,rise=(yStart-yEnd)/count;
+ for(let i=0;i<count;i++){
+  const z=zStart+(zEnd-zStart)*(i+.5)/count,y=yStart-(i+.5)*rise;
+  box(ship,label+' wooden tread',[3.5,.2,stepDepth+.04],[x,y,z],mats.wood);
+  box(ship,label+' wooden riser',[3.5,rise+.02,.14],[x,y-rise/2,z+(zEnd<zStart?stepDepth/2:-stepDepth/2)],mats.wood);
+ }
+ for(const side of [-1,1])beamBetween(ship,label+' sloped handrail',[x+side*2.05,yStart+1,zStart],[x+side*2.05,yEnd+1,zEnd],.14,mats.steel);
 }
 stairFlight(7,44,29,4.35,10.95,12,'Bridge access');
 stairFlight(-7,44,28,4.35,-1.5,14,'Accommodation access');
 box(ship,'Accommodation stair landing',[4,.25,3],[-7,-1.5,28],mats.wood);
 // A vertical engine-room ladder replaces the second staircase.
 for(const x of [-8.35,-5.65])box(ship,'Engine access ladder rail',[.14,5.3,.14],[x,-4.15,20],mats.steel);
-for(let y=-1.8;y>=-6.45;y-=.55)box(ship,'Engine access ladder rung',[2.7,.12,.14],[-7,y,20],mats.yellow);
+for(let y=-1.72;y>=-6.35;y-=.46)box(ship,'Engine access ladder rung',[2.7,.12,.14],[-7,y,20],mats.yellow);
+// Keep the vertical ladder shaft clear between the two actual deck levels.
 // Four colour-coded loading bays stay in their existing positions for crane compatibility.
 const craneBayColors=[0xc94b3d,0x347da1,0x4d936c,0xd39a37];
 const craneBayNames=['RED','BLUE','GREEN','YELLOW'];
