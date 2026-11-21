@@ -21,7 +21,7 @@
     <small>Single-player foundation prototype · Multiplayer comes later</small>
   </section>
 
-  <div id="hud" class="hidden">
+  <div id="pause-menu" class="hidden"><section class="panel pause-panel"><div id="pause-main"><div class="eyebrow">CARGO CHAOS</div><h1>PAUSED</h1><div class="pause-actions"><button id="resume-game">RESUME GAME</button><button id="pause-settings-button" class="secondary">SETTINGS</button></div></div><div id="pause-settings" class="hidden"><div class="eyebrow">GAME SETTINGS</div><h1>SETTINGS</h1><div class="admin-entry"><h2>ADMIN ACCESS</h2><p>Enter the admin code to unlock development tools.</p><div id="admin-lock"><input id="admin-code" type="password" placeholder="Admin code" autocomplete="off"><button id="admin-unlock">UNLOCK</button><div id="admin-error" aria-live="polite"></div></div><div id="admin-tools" class="hidden"><label class="admin-toggle"><span><b>Flight mode</b><small>Space rises · Shift descends</small></span><input id="admin-fly" type="checkbox"></label><label class="admin-toggle"><span><b>Noclip</b><small>Ignore world boundaries and collision barriers</small></span><input id="admin-noclip" type="checkbox"></label><button id="admin-autoload" class="admin-action">AUTO-LOAD SHIP</button></div></div><button id="settings-back" class="secondary">BACK</button></div></section></div><div id="hud" class="hidden">
     <header><div class="brand">CARGO <b>CHAOS</b><small>PORT DEPARTURE</small></div><div class="ship-state"><i></i> WAYFARER · DOCKED</div></header>
     <aside class="objectives">
       <div class="eyebrow">DEPARTURE CHECKLIST</div>
@@ -31,9 +31,9 @@
     </aside>
     <div id="interaction" class="hidden"><kbd>E</kbd><span id="interaction-text">Interact</span></div>
     <div id="message"></div>
-    <div class="bottom"><div><b id="area-name">PORT TERMINAL</b><span id="coordinates">DOCKSIDE</span></div><div class="key-help"><span><kbd>W A S D</kbd> Walk</span><span><kbd>MOUSE</kbd> Look</span><span><kbd>C</kbd> Camera</span><span><kbd>E</kbd> Interact</span><span><kbd>SPACE</kbd> Jump</span><span><kbd>F</kbd> Shove</span><span><kbd>ESC</kbd> Release mouse</span></div></div>
+    <div class="bottom"><div><b id="area-name">PORT TERMINAL</b><span id="coordinates">DOCKSIDE</span></div><div class="key-help"><span><kbd>W A S D</kbd> Walk</span><span><kbd>MOUSE</kbd> Look</span><span><kbd>C</kbd> Camera</span><span><kbd>E</kbd> Interact</span><span><kbd>SPACE</kbd> Jump</span><span><kbd>F</kbd> Shove</span><span><kbd>ESC</kbd> Pause menu</span></div></div>
     <div id="mode-label">THIRD PERSON</div>
   </div>
-  <script type="module" src="game.js?v=crane-room-1"></script>
+  <script type="module" src="game.js?v=ship-admin-1"></script>
 </body>
 </html>
