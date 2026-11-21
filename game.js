@@ -116,7 +116,7 @@ const wheelBase=cylinder(ship,'Steering console pedestal',.45,.55,1,[0,11.7,34],
 const wheel=new THREE.Mesh(new THREE.TorusGeometry(.95,.09,10,32),mats.dark);wheel.name='Ship steering wheel';wheel.position.set(0,12.45,34);wheel.rotation.x=Math.PI/2;ship.add(wheel);
 for(let i=0;i<8;i++){const a=i*Math.PI/4;box(ship,'Steering wheel spoke',[.12,.12,1.8],[Math.cos(a)*.0,12.45,34+Math.sin(a)*.0],mats.steel)}
 box(ship,'Navigation console',[6,.9,1.2],[0,11.55,30.5],mats.dark);
-for(let x=-2;x<=2;x+=1)box(ship,'Navigation display',[.75,.08,.48],[x,12.05,30.25],i=>mats.glass);
+for(let x=-2;x<=2;x+=1)box(ship,'Navigation display',[.75,.08,.48],[x,12.05,30.25],mats.glass);
 const radarScreen=group(ship,[5,11.65,30.8]);
 cylinder(radarScreen,'Radar display housing',1.45,1.45,.18,[0,0,0],mats.dark,32);
 const radarDisc=new THREE.Mesh(new THREE.CircleGeometry(1.25,32),new THREE.MeshBasicMaterial({color:0x123f45}));radarDisc.rotation.x=-Math.PI/2;radarDisc.position.y=.12;radarScreen.add(radarDisc);
@@ -163,11 +163,11 @@ function stairFlight(x,zStart,zEnd,yStart,yEnd,count,label){
  box(ship,label+' stair handrail',[.12,.12,Math.abs(zEnd-zStart)],[x-1.7,(yStart+yEnd)/2+1,(zStart+zEnd)/2],mats.steel);
  box(ship,label+' stair handrail',[.12,.12,Math.abs(zEnd-zStart)],[x+1.7,(yStart+yEnd)/2+1,(zStart+zEnd)/2],mats.steel);
 }
-stairFlight(11,44,29,4.85,10.65,12,'Bridge access');
-stairFlight(-11,44,28,4.7,-1.35,14,'Accommodation access');
-stairFlight(-11,28,12,-1.35,-6.65,12,'Engine access');
-box(ship,'Accommodation stair landing',[4,.25,3],[-11,-1.35,28],mats.wood);
-box(ship,'Engine stair landing',[4,.25,3],[-11,-6.65,12],mats.wood);
+stairFlight(7,44,29,4.85,10.65,12,'Bridge access');
+stairFlight(-7,44,28,4.7,-1.35,14,'Accommodation access');
+stairFlight(-7,28,12,-1.35,-6.65,12,'Engine access');
+box(ship,'Accommodation stair landing',[4,.25,3],[-7,-1.35,28],mats.wood);
+box(ship,'Engine stair landing',[4,.25,3],[-7,-6.65,12],mats.wood);
 // Four colour-coded loading bays stay in their existing positions for crane compatibility.
 const craneBayColors=[0xc94b3d,0x347da1,0x4d936c,0xd39a37];
 const craneBayNames=['RED','BLUE','GREEN','YELLOW'];
@@ -268,12 +268,12 @@ function shipDeckAt(x,z){return x>12&&x<54&&Math.abs(z)<52}
 function playerHeight(){const x=player.position.x,z=player.position.z,sx=x-33;
  if(x>towerX-5&&x<towerX+5&&z>-5.5&&z<5.5&&player.position.y>9.5)return towerFloor;
  if(sx>-15&&sx<15&&z>27&&z<47){
-  if(sx>9&&z<=44&&z>=29)return 4.85+(44-z)/15*5.8;
-  if(sx<-9&&z<=44&&z>=28)return 4.7-(44-z)/16*6.05;
+  if(sx>5.5&&sx<9&&z<=44&&z>=29)return 4.85+(44-z)/15*5.8;
+  if(sx>-9&&sx<-5.5&&z<=44&&z>=28)return 4.7-(44-z)/16*6.05;
   if(player.position.y>8.5)return 10.65;
   return 4.75;
  }
- if(sx>-15&&sx<15&&z>=12&&z<=28&&sx<-9)return -1.35-(28-z)/16*5.3;
+ if(sx>-15&&sx<15&&z>=12&&z<=28&&sx>-9&&sx<-5.5)return -1.35-(28-z)/16*5.3;
  if(sx>-14&&sx<14&&z>-11&&z<27){return player.position.y<-4.1?-6.65:-1.35}
  if(shipDeckAt(x,z))return 4.75;
  if(x>14&&x<21&&z>27&&z<35){const t=THREE.MathUtils.clamp((x-14)/7,0,1);return t*4.75+.2}
