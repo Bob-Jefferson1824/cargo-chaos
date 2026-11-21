@@ -146,15 +146,15 @@ box(ship,'Crew corridor partition',[.35,4.4,27],[0,.75,8],interiorWall);
 box(ship,'Crew corridor doorway header',[4,.35,.35],[0,2.65,21.5],interiorWall);
 box(accommodationProps,'Galley counter',[6,1.1,1.3],[-9,.15,19],mats.dark);
 for(let x=-11;x<=-7;x+=2)box(accommodationProps,'Galley cabinet',[1.5,1.5,1.2],[x,-.65,18],interiorWall);
-box(ship,'Galley worktop',[6,.18,1.5],[-9,.95,18],mats.steel);
-box(ship,'Galley sink',[1.2,.12,.8],[-10,.08,18],mats.dark);
+box(accommodationProps,'Galley worktop',[6,.18,1.5],[-9,.95,18],mats.steel);
+box(accommodationProps,'Galley sink',[1.2,.12,.8],[-10,.08,18],mats.dark);
 box(accommodationProps,'Mess table',[4,.25,2],[-8,-.1,10],mats.wood);
 for(const x of [-10,-6])for(const z of [8,12])box(accommodationProps,'Mess bench',[.65,.55,2],[x,-.45,z],mats.wood);
-for(const x of [7,11]){box(accommodationProps,'Crew bunk frame',[3,.25,6],[x,-.85,17],mats.dark);box(ship,'Crew mattress',[2.8,.3,5.7],[x,-.58,17],material(0x9eb5b6));box(ship,'Crew bunk upper frame',[3,.2,6],[x,.25,17],mats.dark);box(ship,'Crew bunk upper mattress',[2.8,.25,5.7],[x,.48,17],material(0x9eb5b6))}
+for(const x of [7,11]){box(accommodationProps,'Crew bunk frame',[3,.25,6],[x,-.85,17],mats.dark);box(accommodationProps,'Crew mattress',[2.8,.3,5.7],[x,-.58,17],material(0x9eb5b6));box(accommodationProps,'Crew bunk upper frame',[3,.2,6],[x,.25,17],mats.dark);box(accommodationProps,'Crew bunk upper mattress',[2.8,.25,5.7],[x,.48,17],material(0x9eb5b6))}
 box(ship,'Infirmary partition',[.3,4.4,10],[4,.75,-2],interiorWall);
-for(const z of [-5,1]){box(accommodationProps,'Infirmary bed frame',[2.2,.35,4],[8,-.8,z],mats.white);box(ship,'Infirmary mattress',[2.1,.25,3.8],[8,-.5,z],material(0xd8e0dc));box(ship,'Infirmary pillow',[1.3,.25,.8],[8,-.32,z-1.35],mats.white)}
+for(const z of [-5,1]){box(accommodationProps,'Infirmary bed frame',[2.2,.35,4],[8,-.8,z],mats.white);box(accommodationProps,'Infirmary mattress',[2.1,.25,3.8],[8,-.5,z],material(0xd8e0dc));box(accommodationProps,'Infirmary pillow',[1.3,.25,.8],[8,-.32,z-1.35],mats.white)}
 box(ship,'Captain cabin partition',[.3,4.4,12],[-4,.75,-1],interiorWall);
-box(accommodationProps,'Captain bed frame',[3,.35,5],[-9,-.8,-4],mats.wood);box(ship,'Captain bed mattress',[2.8,.3,4.8],[-9,-.5,-4],material(0x8a9eae));
+box(accommodationProps,'Captain bed frame',[3,.35,5],[-9,-.8,-4],mats.wood);box(accommodationProps,'Captain bed mattress',[2.8,.3,4.8],[-9,-.5,-4],material(0x8a9eae));
 box(accommodationProps,'Captain desk',[3,.9,1.2],[-9,-.15,4],mats.wood);box(accommodationProps,'Captain locker',[1.2,2.6,1.2],[-12,-.2,-5],interiorTrim);
 // Engine room: large machinery, pipes, gauges and service walkways.
 for(const x of [-8,0,8]){
