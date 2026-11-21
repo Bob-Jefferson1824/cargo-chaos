@@ -223,14 +223,7 @@ box(craneConsole,'Screen frame facing ship',[.12,1.05,2.25],[2.78,2.15,0],mats.y
 box(craneConsole,'Crane monitor facing ship',[.08,.88,2.05],[2.86,2.15,0],mats.glass);
 for(let z of [-1.45,-.85,-.25,.35,.95,1.45])cylinder(craneConsole,'Crane control button',.12,.12,.14,[2.55,1.72,z],mats.yellow,10);
 cylinder(craneConsole,'Crane joystick',.1,.1,.48,[2.55,1.95,-1.75],mats.black,10);
-// Four colour-coded loading bays in a 2x2 layout, with a clear walking gap between containers.
-const craneBayColors=[0xc94b3d,0x347da1,0x4d936c,0xd39a37];
-const craneBayNames=['RED','BLUE','GREEN','YELLOW'];
-const craneBayPositions=craneBayColors.map((color,i)=>({x:(i%2===0?-4.3:4.3),z:(i<2?-25:-14),color}));
-for(let i=0;i<4;i++){const p=craneBayPositions[i],lineMat=material(p.color,.72,0);
- for(const x of [-3.15,3.15])box(ship,'Decorative coloured loading line',[.12,.035,8.8],[p.x+x,4.73,p.z],lineMat,{cast:false});
- for(const z of [-4.4,4.4])box(ship,'Decorative coloured loading line',[6.3,.035,.12],[p.x,4.73,p.z+z],lineMat,{cast:false});
-}
+// Loading-bay definitions and deck markings were created above.
 
 // Massive shore gantry crane spanning the cargo loading area
 const crane=group(scene,[0,0,0]);crane.userData.mode=false;
