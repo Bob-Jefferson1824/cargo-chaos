@@ -57,31 +57,125 @@ for(let i=0;i<4;i++){
  g.userData={loaded:false,held:false,index:i,bayIndex:i};crates.push(g);
 }
 
-// The larger docked cargo vessel
+// The MV Wayfarer: a shaped cargo vessel with a walkable four-level layout.
 const ship=group(scene,[33,0,0]);ship.userData.isShip=true;
-const hull=box(ship,'Cargo ship hull',[42,8,108],[0,0,0],material(0x263f50,.48,.22));hull.position.y=0;
-const bow= new THREE.Mesh(new THREE.ConeGeometry(21,22,4),material(0x263f50,.48,.2));bow.rotation.x=Math.PI/2;bow.rotation.z=Math.PI/4;bow.scale.set(1,.55,1);bow.position.set(0,-.3,-61);bow.castShadow=true;ship.add(bow);
-box(ship,'Red waterline stripe',[42,.65,108],[0,-3.5,0],mats.red);
-box(ship,'Main deck',[41,.7,104],[0,4.35,0],material(0x9b927e));
-box(ship,'Deck edge trim',[43,.3,105],[0,4.0,0],mats.white);
-for(let side of [-1,1]){box(ship,'Ship rail',[.28,1.35,100],[side*20.25,5.2,0],mats.white);for(let z=-48;z<=48;z+=4)cylinder(ship,'Rail stanchion',.09,.09,1.4,[side*20.25,5.2,z],mats.steel,8)}
-// Empty cargo deck: all cargo must be loaded by the players at the port.
-// Bridge and windows at stern
-box(ship,'Bridge lower deck',[21,5.5,15],[0,7.45,31],mats.white);
-box(ship,'Bridge glazing',[21.2,2.7,15.1],[0,8.65,31],mats.glass);
-box(ship,'Bridge roof',[22,.7,16],[0,10.35,31],mats.yellow);
-for(let x=-9;x<=9;x+=3)box(ship,'Bridge window mullion',[.18,2.8,.18],[x,8.65,23.45],mats.dark);
-cylinder(ship,'Ship mast',.22,.3,9,[0,15,31],mats.white);
-for(let i=0;i<3;i++)box(ship,'Mast antenna',[3,.12,.12],[0,16+i*.55,31],mats.dark);
+const hullMat=material(0x263f50,.42,.28),hullDark=material(0x172d3a,.5,.35),deckMat=material(0x9b927e),interiorWall=material(0xd7d4c8),interiorTrim=material(0x435b65),floorMat=material(0x596a6b),warmLight=material(0xf0d7a5);
+function makeHull(){
+ const stations=[[-55,.7],[-48,13],[-36,18],[-15,20],[15,20],[36,19],[48,16],[53,13]];
+ const ring=[[-1,4],[1,4],[.88,-1.5],[0,-9],[-.88,-1.5]];
+ const verts=[],indices=[];
+ for(const [z,w] of stations)for(const [x,y] of ring)verts.push(x*w,y,z);
+ for(let s=0;s<stations.length-1;s++)for(let k=0;k<ring.length;k++){
+  const a=s*ring.length+k,b=s*ring.length+(k+1)%ring.length,c=(s+1)*ring.length+(k+1)%ring.length,d=(s+1)*ring.length+k;
+  indices.push(a,b,d,b,c,d);
+ }
+ const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));geo.setIndex(indices);geo.computeVertexNormals();
+ const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:0x263f50,roughness:.43,metalness:.25,side:THREE.DoubleSide}));mesh.name='Tapered steel cargo ship hull';mesh.castShadow=true;mesh.receiveShadow=true;ship.add(mesh);
+}
+makeHull();
+// Continuous shaped deck with a pointed bow instead of a rectangular floating platform.
+const deckVerts=[[-20,4.35,50],[20,4.35,50],[20,4.35,-42],[0,4.35,-55],[-20,4.35,-42]];
+const deckGeo=new THREE.BufferGeometry();deckGeo.setAttribute('position',new THREE.Float32BufferAttribute(deckVerts.flat(),3));deckGeo.setIndex([0,1,2,0,2,3,0,3,4]);deckGeo.computeVertexNormals();
+const deckMesh=new THREE.Mesh(deckGeo,new THREE.MeshStandardMaterial({color:0x9b927e,roughness:.9,side:THREE.DoubleSide}));deckMesh.name='Shaped main cargo deck';deckMesh.receiveShadow=true;ship.add(deckMesh);
+box(ship,'Deck bow reinforcement',[.5,.25,18],[0,4.18,-39],mats.steel);
+box(ship,'Red waterline stripe',[.28,.35,91],[0,-1.7,0],mats.red);
+for(const side of [-1,1]){
+ for(let z=-40;z<=43;z+=4){const taper=z<-35?Math.max(13,20+(z+35)*.65):z>39?18-(z-39)*.6:20;cylinder(ship,'Hull side rubbing strake',.12,.12,1.2,[side*taper,-1.3,z],mats.white,8).rotation.x=Math.PI/2}
+ // Main deck safety rail, with the bow rails following the taper.
+ for(let z=-39;z<=43;z+=4){const taper=z<-35?Math.max(13,20+(z+35)*.65):20;box(ship,'Ship rail post',[.18,1.45,.18],[side*taper,5.1,z],mats.white)}
+ box(ship,'Ship side handrail',[.22,.2,82],[side*19.6,5.8,2],mats.white);
+}
+for(let x=-15;x<=15;x+=5){box(ship,'Stern rail post',[.18,1.45,.18],[x,5.1,48],mats.white)}
+box(ship,'Stern handrail',[30,.2,.22],[0,5.8,48],mats.white);
+// Anchor housings, lifeboats, deck winches and exterior service fittings.
+for(const side of [-1,1]){
+ box(ship,'Anchor hawse plate',[.5,1.2,2],[side*15,-.1,-47],mats.steel);
+ const anchor=group(ship,[side*15,-.7,-47]);cylinder(anchor,'Anchor shank',.13,.13,2,[0,0,0],mats.dark,8);box(anchor,'Anchor crossbar',[1.6,.16,.18],[0,-.75,0],mats.dark);
+ const boat=group(ship,[side*14,7.1,19]);box(boat,'Lifeboat hull',[5,.8,2],[0,0,0],material(0xe8e4d5));box(boat,'Lifeboat canopy',[3.8,1.2,1.7],[0,.8,0],material(0xe2a64f));for(const x of [-2,2])box(ship,'Lifeboat davit',[.25,3,.25],[side*14+x,6.4,19],mats.steel);
+ for(const z of [-33,38]){cylinder(ship,'Deck mooring winch',.75,.75,1.2,[side*14,5.1,z],mats.dark,12);cylinder(ship,'Winch drum',.9,.9,.45,[side*14,5.1,z],mats.steel,12).rotation.x=Math.PI/2}
+}
+// Main-deck deckhouse: open entrance into the stair lobby.
+const deckhouse=group(ship,[0,0,0]);
+box(deckhouse,'Deckhouse port wall',[.6,5.7,19],[-9.3,7.7,37.5],interiorWall);
+box(deckhouse,'Deckhouse starboard wall',[.6,5.7,19],[9.3,7.7,37.5],interiorWall);
+box(deckhouse,'Deckhouse aft wall',[18,.5,.7],[0,10.45,47],interiorWall);
+box(deckhouse,'Deckhouse forward wall left',[6,5.7,.6],[-6,7.7,28],interiorWall);
+box(deckhouse,'Deckhouse forward wall right',[6,5.7,.6],[6,7.7,28],interiorWall);
+box(deckhouse,'Deckhouse front lintel',[6,.55,.65],[0,10.25,28],mats.yellow);
+box(deckhouse,'Deckhouse roof overhang',[20,.45,20],[0,10.7,37.5],mats.dark);
+for(const side of [-1,1])for(const z of [31,36,41,45]){box(deckhouse,'Deckhouse side window frame',[.22,1.6,2.8],[side*9.65,8.3,z],mats.dark);box(deckhouse,'Deckhouse side window glass',[.12,1.25,2.45],[side*9.63,8.3,z],mats.glass)}
+// Upper bridge level with wraparound glazing, wheel, navigation console and radar.
+box(ship,'Bridge upper floor',[18,.55,18],[0,10.95,37.5],mats.dark);
+for(const side of [-1,1])box(ship,'Bridge panoramic side glass',[.22,3.5,17],[side*9,12.95,37.5],mats.glass);
+box(ship,'Bridge forward panoramic glass',[18,3.5,.22],[0,12.95,28.8],mats.glass);
+box(ship,'Bridge aft panoramic glass',[18,3.5,.22],[0,12.95,46.2],mats.glass);
+for(const x of [-9,9])for(const z of [29,46])cylinder(ship,'Bridge corner support',.16,.16,4,[x,12.9,z],mats.steel,10);
+box(ship,'Bridge roof',[20,.65,19],[0,14.95,37.5],mats.white);
+box(ship,'Bridge roof brow',[21,.22,2],[0,14.55,28],mats.yellow);
+const wheelBase=cylinder(ship,'Steering console pedestal',.45,.55,1,[0,11.7,34],mats.steel,12);
+const wheel=new THREE.Mesh(new THREE.TorusGeometry(.95,.09,10,32),mats.dark);wheel.name='Ship steering wheel';wheel.position.set(0,12.45,34);wheel.rotation.x=Math.PI/2;ship.add(wheel);
+for(let i=0;i<8;i++){const a=i*Math.PI/4;box(ship,'Steering wheel spoke',[.12,.12,1.8],[Math.cos(a)*.0,12.45,34+Math.sin(a)*.0],mats.steel)}
+box(ship,'Navigation console',[6,.9,1.2],[0,11.55,30.5],mats.dark);
+for(let x=-2;x<=2;x+=1)box(ship,'Navigation display',[.75,.08,.48],[x,12.05,30.25],i=>mats.glass);
+const radarScreen=group(ship,[5,11.65,30.8]);
+cylinder(radarScreen,'Radar display housing',1.45,1.45,.18,[0,0,0],mats.dark,32);
+const radarDisc=new THREE.Mesh(new THREE.CircleGeometry(1.25,32),new THREE.MeshBasicMaterial({color:0x123f45}));radarDisc.rotation.x=-Math.PI/2;radarDisc.position.y=.12;radarScreen.add(radarDisc);
+for(let r=.4;r<1.2;r+=.4){const ring=new THREE.Mesh(new THREE.RingGeometry(r,r+.018,48),new THREE.MeshBasicMaterial({color:0x4bd1a1,side:THREE.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.y=.14;radarScreen.add(ring)}
+const radarBeam=new THREE.Mesh(new THREE.BoxGeometry(.025,.025,1.15),new THREE.MeshBasicMaterial({color:0x78ffbd}));radarBeam.position.set(0,.16,-.55);radarScreen.add(radarBeam);
+cylinder(ship,'Bridge mast',.22,.28,9,[0,19,37.5],mats.white,12);
+for(let i=0;i<3;i++)box(ship,'Mast antenna',[3,.12,.12],[0,22+i*.55,37.5],mats.dark);
 box(ship,'Funnel',[5,9,6],[9,14,17],mats.red);box(ship,'Funnel cap',[5.3,.7,6.3],[9,18.7,17],mats.dark);
-// Deck markings and package bay
-box(ship,'Cargo bay marking',[8,.04,8],[0,4.73,0],mats.yellow,{cast:false});
-box(ship,'Package securing platform',[4,.18,4],[0,4.85,0],mats.dark);
-for(let x of [-2,2])for(let z of [-2,2])cylinder(ship,'Package tie-down',.16,.16,.35,[x,5.05,z],mats.yellow,8);
-// gangway from dock onto ship
-const ramp=box(scene,'Boarding gangway',[7,.55,5],[17.8,2.35,31],material(0x9a9c91));ramp.position.y=2.35;ramp.rotation.z=.28;
-for(let x=15;x<=20;x+=1.5)box(scene,'Gangway handrail',[.14,1.15,.14],[x,3.0,28.6],mats.white);
-
+for(const side of [-1,1]){box(ship,'Funnel exhaust brace',[.35,5,.35],[side*3,12.5,17],mats.steel)}
+// Two lower internal decks inside the extended hull.
+box(ship,'Accommodation deck floor',[29,.45,39],[0,-1.5,8],floorMat);
+box(ship,'Engine room floor',[29,.45,39],[0,-6.8,8],floorMat);
+box(ship,'Accommodation ceiling',[29,.35,39],[0,3.05,8],interiorTrim);
+box(ship,'Engine room ceiling',[29,.35,39],[0,-4.05,8],interiorTrim);
+for(const x of [-14.2,14.2]){box(ship,'Accommodation outer bulkhead',[.5,4.6,39],[x,.75,8],interiorWall);box(ship,'Engine room outer bulkhead',[.5,5.1,39],[x,-3.8,8],interiorTrim)}
+// Accommodation rooms: galley, infirmary, crew bunks and captain's cabin.
+box(ship,'Crew corridor partition',[.35,4.4,27],[0,.75,8],interiorWall);
+box(ship,'Crew corridor doorway header',[4,.35,.35],[0,2.65,21.5],interiorWall);
+box(ship,'Galley counter',[6,1.1,1.3],[-9,.15,19],mats.dark);
+for(let x=-11;x<=-7;x+=2)box(ship,'Galley cabinet',[1.5,1.5,1.2],[x,-.65,18],interiorWall);
+box(ship,'Galley worktop',[6,.18,1.5],[-9,.95,18],mats.steel);
+box(ship,'Galley sink',[1.2,.12,.8],[-10,.08,18],mats.dark);
+box(ship,'Mess table',[4,.25,2],[-8,-.1,10],mats.wood);
+for(const x of [-10,-6])for(const z of [8,12])box(ship,'Mess bench',[.65,.55,2],[x,-.45,z],mats.wood);
+for(const x of [7,11]){box(ship,'Crew bunk frame',[3,.25,6],[x,-.85,17],mats.dark);box(ship,'Crew mattress',[2.8,.3,5.7],[x,-.58,17],material(0x9eb5b6));box(ship,'Crew bunk upper frame',[3,.2,6],[x,.25,17],mats.dark);box(ship,'Crew bunk upper mattress',[2.8,.25,5.7],[x,.48,17],material(0x9eb5b6))}
+box(ship,'Infirmary partition',[.3,4.4,10],[4,.75,-2],interiorWall);
+for(const z of [-5,1]){box(ship,'Infirmary bed frame',[2.2,.35,4],[8,-.8,z],mats.white);box(ship,'Infirmary mattress',[2.1,.25,3.8],[8,-.5,z],material(0xd8e0dc));box(ship,'Infirmary pillow',[1.3,.25,.8],[8,-.32,z-1.35],mats.white)}
+box(ship,'Captain cabin partition',[.3,4.4,12],[-4,.75,-1],interiorWall);
+box(ship,'Captain bed frame',[3,.35,5],[-9,-.8,-4],mats.wood);box(ship,'Captain bed mattress',[2.8,.3,4.8],[-9,-.5,-4],material(0x8a9eae));
+box(ship,'Captain desk',[3,.9,1.2],[-9,-.15,4],mats.wood);box(ship,'Captain locker',[1.2,2.6,1.2],[-12,-.2,-5],interiorTrim);
+// Engine room: large machinery, pipes, gauges and service walkways.
+for(const x of [-8,0,8]){
+ box(ship,'Main engine block',[4,3.2,8],[x,-5.05,8],mats.dark);
+ for(let z=5;z<=11;z+=2)cylinder(ship,'Engine cylinder',.65,.65,1.1,[x,-3.2,z],mats.steel,12);
+ box(ship,'Engine warning stripe',[4.1,.16,.3],[x,-3.35,4],mats.yellow);
+}
+for(const x of [-11,-5,5,11]){cylinder(ship,'Engine pipe',.22,.22,28,[x,-5.2,8],mats.yellow,10).rotation.x=Math.PI/2;for(const z of [-7,0,7,14,21])box(ship,'Pipe support',[.4,.3,.4],[x,-6.25,z],mats.steel)}
+box(ship,'Engine control panel',[5,2.2,.6],[0,-5.1,-10],mats.dark);
+for(let x=-1.7;x<=1.7;x+=.85){cylinder(ship,'Engine gauge',.28,.28,.12,[x,-4.45,-10],mats.glass,16);box(ship,'Engine control lever',[.12,.8,.12],[x,-5.1,-9.5],mats.yellow)}
+// Stair flights and landings: starboard goes up to the bridge; port descends to both lower decks.
+function stairFlight(x,zStart,zEnd,yStart,yEnd,count,label){
+ const stepDepth=Math.abs(zEnd-zStart)/count;
+ for(let i=0;i<count;i++){const t=(i+.5)/count,z=zStart+(zEnd-zStart)*t,y=yStart+(yEnd-yStart)*t;box(ship,label+' stair tread',[3,.22,stepDepth+.08],[x,y,z],mats.wood);box(ship,label+' stair riser',[3,.35,.16],[x,y-.16,z+(zEnd<zStart?stepDepth/2:-stepDepth/2)],interiorTrim)}
+ box(ship,label+' stair handrail',[.12,.12,Math.abs(zEnd-zStart)],[x-1.7,(yStart+yEnd)/2+1,(zStart+zEnd)/2],mats.steel);
+ box(ship,label+' stair handrail',[.12,.12,Math.abs(zEnd-zStart)],[x+1.7,(yStart+yEnd)/2+1,(zStart+zEnd)/2],mats.steel);
+}
+stairFlight(11,44,29,4.85,10.65,12,'Bridge access');
+stairFlight(-11,44,28,4.7,-1.35,14,'Accommodation access');
+stairFlight(-11,28,12,-1.35,-6.65,12,'Engine access');
+box(ship,'Accommodation stair landing',[4,.25,3],[-11,-1.35,28],mats.wood);
+box(ship,'Engine stair landing',[4,.25,3],[-11,-6.65,12],mats.wood);
+// Four colour-coded loading bays stay in their existing positions for crane compatibility.
+const craneBayColors=[0xc94b3d,0x347da1,0x4d936c,0xd39a37];
+const craneBayNames=['RED','BLUE','GREEN','YELLOW'];
+const craneBayPositions=craneBayColors.map((color,i)=>({x:(i%2===0?-4.3:4.3),z:(i<2?-25:-14),color}));
+for(let i=0;i<4;i++){const p=craneBayPositions[i],lineMat=material(p.color,.72,0);
+ for(const x of [-3.15,3.15])box(ship,'Decorative coloured loading line',[.12,.035,8.8],[p.x+x,4.73,p.z],lineMat,{cast:false});
+ for(const z of [-4.4,4.4])box(ship,'Decorative coloured loading line',[6.3,.035,.12],[p.x,4.73,p.z+z],lineMat,{cast:false});
+}
 // Side-mounted crane operator tower with an enclosed control room and climb-through hatch.
 const towerX=-45,towerZ=0,towerFloor=10.5;
 const craneTower=group(scene,[towerX,0,towerZ]);
@@ -171,7 +265,19 @@ const keys={};const clock=new THREE.Clock();let nearest=null;
 function say(text){message.textContent=text;message.style.opacity='1';noticeTimer=2.7}
 function updateObjectives(){const count=crates.filter(c=>c.userData.loaded).length;$('#crate-count').textContent=count+' / 4';$('#crate-objective').classList.toggle('done',count===4);$('#package-state').textContent=packageCollected?'COLLECTED':'NOT COLLECTED';$('#package-objective').classList.toggle('done',packageCollected);$('#secure-state').textContent=packageSecured?'SECURED':'WAITING';$('#secure-objective').classList.toggle('done',packageSecured)}
 function shipDeckAt(x,z){return x>12&&x<54&&Math.abs(z)<52}
-function playerHeight(){const x=player.position.x,z=player.position.z;if(x>towerX-5&&x<towerX+5&&z>-5.5&&z<5.5&&player.position.y>9.5)return towerFloor;if(shipDeckAt(x,z))return 4.75;if(x>14&&x<21&&z>27&&z<35){const t=THREE.MathUtils.clamp((x-14)/7,0,1);return t*4.75+.2}return .2}
+function playerHeight(){const x=player.position.x,z=player.position.z,sx=x-33;
+ if(x>towerX-5&&x<towerX+5&&z>-5.5&&z<5.5&&player.position.y>9.5)return towerFloor;
+ if(sx>-15&&sx<15&&z>27&&z<47){
+  if(sx>9&&z<=44&&z>=29)return 4.85+(44-z)/15*5.8;
+  if(sx<-9&&z<=44&&z>=28)return 4.7-(44-z)/16*6.05;
+  if(player.position.y>8.5)return 10.65;
+  return 4.75;
+ }
+ if(sx>-15&&sx<15&&z>=12&&z<=28&&sx<-9)return -1.35-(28-z)/16*5.3;
+ if(sx>-14&&sx<14&&z>-11&&z<27){return player.position.y<-4.1?-6.65:-1.35}
+ if(shipDeckAt(x,z))return 4.75;
+ if(x>14&&x<21&&z>27&&z<35){const t=THREE.MathUtils.clamp((x-14)/7,0,1);return t*4.75+.2}
+ return .2}
 function findTarget(){const p=player.position;let best=null,bestD=5.2;const near=(obj,pos,dist,action,label)=>{const d=p.distanceTo(new THREE.Vector3(...pos));if(d<dist&&d<bestD){bestD=d;best={obj,action,label,d}}};
  if(!packageCollected&&!packageSecured)near(packageMesh,[-61,1,-14],5.5,'package','Collect the special package');
  if(packageCollected&&!packageSecured&&shipDeckAt(p.x,p.z)&&Math.abs(p.x-33)<10&&Math.abs(p.z)<10)near(ship,[33,5,0],7,'secure','Secure the special package aboard');
