@@ -60,6 +60,11 @@ for(let i=0;i<4;i++){
 // The MV Wayfarer: a shaped cargo vessel with a walkable four-level layout.
 const ship=group(scene,[33,0,0]);ship.userData.isShip=true;
 const hullMat=material(0x263f50,.42,.28),hullDark=material(0x172d3a,.5,.35),deckMat=material(0x9b927e),interiorWall=material(0xd7d4c8),interiorTrim=material(0x435b65),floorMat=material(0x596a6b),warmLight=material(0xf0d7a5);
+function makeDeckPlate(parent,name,x1,x2,z1,z2,y,holes,mat){
+ const shape=new THREE.Shape();shape.moveTo(x1,-z2);shape.lineTo(x2,-z2);shape.lineTo(x2,-z1);shape.lineTo(x1,-z1);shape.closePath();
+ for(const [hx1,hx2,hz1,hz2] of holes){const hole=new THREE.Path();hole.moveTo(hx1,-hz2);hole.lineTo(hx1,-hz1);hole.lineTo(hx2,-hz1);hole.lineTo(hx2,-hz2);hole.closePath();shape.holes.push(hole)}
+ const geo=new THREE.ShapeGeometry(shape,1);geo.rotateX(-Math.PI/2);const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:mat.color,roughness:mat.roughness,metalness:mat.metalness,side:THREE.DoubleSide}));mesh.name=name;mesh.position.y=y;mesh.receiveShadow=true;parent.add(mesh);return mesh;
+}
 function makeHull(){
  const stations=[[-55,.7],[-48,13],[-36,18],[-15,20],[15,20],[36,19],[48,16],[53,13]];
  const ring=[[-1,4],[1,4],[.88,-1.5],[0,-9],[-.88,-1.5]];
@@ -74,9 +79,10 @@ function makeHull(){
 }
 makeHull();
 // Continuous shaped deck with a pointed bow instead of a rectangular floating platform.
-const deckVerts=[[-20,4.35,50],[20,4.35,50],[20,4.35,-42],[0,4.35,-55],[-20,4.35,-42]];
-const deckGeo=new THREE.BufferGeometry();deckGeo.setAttribute('position',new THREE.Float32BufferAttribute(deckVerts.flat(),3));deckGeo.setIndex([0,1,2,0,2,3,0,3,4]);deckGeo.computeVertexNormals();
-const deckMesh=new THREE.Mesh(deckGeo,new THREE.MeshStandardMaterial({color:0x9b927e,roughness:.9,side:THREE.DoubleSide}));deckMesh.name='Shaped main cargo deck';deckMesh.receiveShadow=true;ship.add(deckMesh);
+const deckShape=new THREE.Shape();deckShape.moveTo(-20,-50);deckShape.lineTo(20,-50);deckShape.lineTo(20,42);deckShape.lineTo(0,55);deckShape.lineTo(-20,42);deckShape.closePath();
+for(const [hx1,hx2,hz1,hz2] of [[5,9,29,44],[-9,-5,28,44]]){const hole=new THREE.Path();hole.moveTo(hx1,-hz2);hole.lineTo(hx1,-hz1);hole.lineTo(hx2,-hz1);hole.lineTo(hx2,-hz2);hole.closePath();deckShape.holes.push(hole)}
+const deckGeo=new THREE.ShapeGeometry(deckShape,1);deckGeo.rotateX(-Math.PI/2);
+const deckMesh=new THREE.Mesh(deckGeo,new THREE.MeshStandardMaterial({color:0x9b927e,roughness:.9,side:THREE.DoubleSide}));deckMesh.name='Shaped main cargo deck with stairwell openings';deckMesh.position.y=4.35;deckMesh.receiveShadow=true;ship.add(deckMesh);
 box(ship,'Deck bow reinforcement',[.5,.25,18],[0,4.18,-39],mats.steel);
 box(ship,'Red waterline stripe',[.28,.35,91],[0,-1.7,0],mats.red);
 for(const side of [-1,1]){
@@ -105,7 +111,7 @@ box(deckhouse,'Deckhouse front lintel',[6,.55,.65],[0,10.25,28],mats.yellow);
 box(deckhouse,'Deckhouse roof overhang',[20,.45,20],[0,10.7,37.5],mats.dark);
 for(const side of [-1,1])for(const z of [31,36,41,45]){box(deckhouse,'Deckhouse side window frame',[.22,1.6,2.8],[side*9.65,8.3,z],mats.dark);box(deckhouse,'Deckhouse side window glass',[.12,1.25,2.45],[side*9.63,8.3,z],mats.glass)}
 // Upper bridge level with wraparound glazing, wheel, navigation console and radar.
-box(ship,'Bridge upper floor',[18,.55,18],[0,10.95,37.5],mats.dark);
+makeDeckPlate(ship,'Bridge upper floor with stair opening',-9,9,28.5,46.5,10.95,[[5,9,29,44]],mats.dark);
 for(const side of [-1,1])box(ship,'Bridge panoramic side glass',[.22,3.5,17],[side*9,12.95,37.5],mats.glass);
 box(ship,'Bridge forward panoramic glass',[18,3.5,.22],[0,12.95,28.8],mats.glass);
 box(ship,'Bridge aft panoramic glass',[18,3.5,.22],[0,12.95,46.2],mats.glass);
@@ -127,9 +133,9 @@ for(let i=0;i<3;i++)box(ship,'Mast antenna',[3,.12,.12],[0,22+i*.55,37.5],mats.d
 box(ship,'Funnel',[5,9,6],[9,14,17],mats.red);box(ship,'Funnel cap',[5.3,.7,6.3],[9,18.7,17],mats.dark);
 for(const side of [-1,1]){box(ship,'Funnel exhaust brace',[.35,5,.35],[side*3,12.5,17],mats.steel)}
 // Two lower internal decks inside the extended hull.
-box(ship,'Accommodation deck floor',[29,.45,39],[0,-1.5,8],floorMat);
+makeDeckPlate(ship,'Accommodation deck floor with engine stair opening',-14.5,14.5,-11,27,-1.5,[[-9,-5,12,28]],floorMat);
 box(ship,'Engine room floor',[29,.45,39],[0,-6.8,8],floorMat);
-box(ship,'Accommodation ceiling',[29,.35,39],[0,3.05,8],interiorTrim);
+makeDeckPlate(ship,'Accommodation ceiling with stairwell opening',-14.5,14.5,-11,27,3.05,[[-9,-5,12,28]],interiorTrim);
 box(ship,'Engine room ceiling',[29,.35,39],[0,-4.05,8],interiorTrim);
 for(const x of [-14.2,14.2]){box(ship,'Accommodation outer bulkhead',[.5,4.6,39],[x,.75,8],interiorWall);box(ship,'Engine room outer bulkhead',[.5,5.1,39],[x,-3.8,8],interiorTrim)}
 // Accommodation rooms: galley, infirmary, crew bunks and captain's cabin.
@@ -156,6 +162,10 @@ for(const x of [-8,0,8]){
 for(const x of [-11,-5,5,11]){cylinder(ship,'Engine pipe',.22,.22,28,[x,-5.2,8],mats.yellow,10).rotation.x=Math.PI/2;for(const z of [-7,0,7,14,21])box(ship,'Pipe support',[.4,.3,.4],[x,-6.25,z],mats.steel)}
 box(ship,'Engine control panel',[5,2.2,.6],[0,-5.1,-10],mats.dark);
 for(let x=-1.7;x<=1.7;x+=.85){cylinder(ship,'Engine gauge',.28,.28,.12,[x,-4.45,-10],mats.glass,16);box(ship,'Engine control lever',[.12,.8,.12],[x,-5.1,-9.5],mats.yellow)}
+// Warm practical lighting makes the lower decks readable when the player enters.
+for(const [x,y,z,intensity,distance] of [[0,1,22,2.2,24],[-9,1,9,1.5,16],[8,1,17,1.6,18],[8,1,-3,1.6,18],[-9,-4.8,18,2.4,22],[0,-4.8,4,2.2,24],[9,-4.8,-5,1.8,18],[0,12.5,37,1.4,24]]){
+ const light=new THREE.PointLight(0xffd5a0,intensity,distance);light.position.set(x,y,z);ship.add(light)
+}
 // Stair flights and landings: starboard goes up to the bridge; port descends to both lower decks.
 function stairFlight(x,zStart,zEnd,yStart,yEnd,count,label){
  const stepDepth=Math.abs(zEnd-zStart)/count;
