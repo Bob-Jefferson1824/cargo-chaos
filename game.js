@@ -104,7 +104,7 @@ for(const side of [-1,1]){
 const deckhouse=group(ship,[0,0,0]);
 box(deckhouse,'Deckhouse port wall',[.6,5.7,19],[-9.3,7.7,37.5],interiorWall);
 box(deckhouse,'Deckhouse starboard wall',[.6,5.7,19],[9.3,7.7,37.5],interiorWall);
-box(deckhouse,'Deckhouse aft wall',[18,.5,.7],[0,10.45,47],interiorWall);
+box(deckhouse,'Deckhouse aft wall left pier',[6,5.7,.6],[-6,7.7,47],interiorWall);\nbox(deckhouse,'Deckhouse aft wall right pier',[6,5.7,.6],[6,7.7,47],interiorWall);\nbox(deckhouse,'Deckhouse aft doorway lintel',[6,.55,.6],[0,10.25,47],mats.yellow);
 box(deckhouse,'Deckhouse forward wall left',[6,5.7,.6],[-6,7.7,28],interiorWall);
 box(deckhouse,'Deckhouse forward wall right',[6,5.7,.6],[6,7.7,28],interiorWall);
 box(deckhouse,'Deckhouse front lintel',[6,.55,.65],[0,10.25,28],mats.yellow);
