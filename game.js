@@ -14,7 +14,7 @@ function cylinder(parent,name,r1,r2,h,pos,mat,segments=12){const m=new THREE.Mes
 function group(parent,pos=[0,0,0]){const g=new THREE.Group();g.position.set(...pos);parent.add(g);return g}
 
 // Ocean and port land
-const waterGeo=new THREE.PlaneGeometry(650,520,90,70);waterGeo.rotateX(-Math.PI/2);const waterMat=new THREE.MeshStandardMaterial({color:0x187f98,roughness:.32,metalness:.08,flatShading:true});const water=new THREE.Mesh(waterGeo,waterMat);water.position.set(90,-1.4,0);water.receiveShadow=true;scene.add(water);const waterBase=Float32Array.from(waterGeo.attributes.position.array);
+const waterGeo=new THREE.PlaneGeometry(650,520,48,38);waterGeo.rotateX(-Math.PI/2);const waterMat=new THREE.MeshStandardMaterial({color:0x187f98,roughness:.32,metalness:.08});const water=new THREE.Mesh(waterGeo,waterMat);water.position.set(90,-1.4,0);water.receiveShadow=true;scene.add(water);const waterBase=Float32Array.from(waterGeo.attributes.position.array);
 box(scene,'Port land',[120,1,130],[-65,-.55,0],mats.concrete);
 box(scene,'Dock apron',[23.5,1.2,92],[-3.25,-.1,0],material(0x687c7d));
 box(scene,'Quay edge',[1.2,2,81],[8.5,-.05,-6.5],mats.white);
@@ -85,11 +85,11 @@ makeHull();
 // Continuous shaped deck with a pointed bow instead of a rectangular floating platform.
 const deckShape=new THREE.Shape();
 deckShape.moveTo(-8,-50);deckShape.lineTo(8,-50);deckShape.lineTo(13,-48);deckShape.lineTo(18,-36);deckShape.lineTo(20,-15);deckShape.lineTo(20,15);deckShape.lineTo(19,36);deckShape.lineTo(16,48);deckShape.lineTo(13,53);deckShape.lineTo(-13,53);deckShape.lineTo(-16,48);deckShape.lineTo(-19,36);deckShape.lineTo(-20,15);deckShape.lineTo(-20,-15);deckShape.lineTo(-18,-36);deckShape.lineTo(-13,-48);deckShape.closePath();
-for(const [hx1,hx2,hz1,hz2] of [[5,9,29,44],[-9,-5,28,44]]){const hole=new THREE.Path();hole.moveTo(hx1,-hz2);hole.lineTo(hx1,-hz1);hole.lineTo(hx2,-hz1);hole.lineTo(hx2,-hz2);hole.closePath();deckShape.holes.push(hole)}
+for(const [hx1,hx2,hz1,hz2] of [[5,9,29,44],[-10,-4,27,45]]){const hole=new THREE.Path();hole.moveTo(hx1,-hz2);hole.lineTo(hx1,-hz1);hole.lineTo(hx2,-hz1);hole.lineTo(hx2,-hz2);hole.closePath();deckShape.holes.push(hole)}
 const deckGeo=new THREE.ShapeGeometry(deckShape,1);deckGeo.rotateX(-Math.PI/2);
 const deckMesh=new THREE.Mesh(deckGeo,new THREE.MeshStandardMaterial({color:0x9b927e,roughness:.9,side:THREE.DoubleSide}));deckMesh.name='Shaped main cargo deck with stairwell openings';deckMesh.position.y=4.35;deckMesh.receiveShadow=true;ship.add(deckMesh);
 box(ship,'Deck bow reinforcement',[.5,.25,18],[0,4.18,-39],mats.steel);
-box(ship,'Red waterline stripe',[.28,.35,91],[0,-1.7,0],mats.red);
+// Hull waterline is kept clean; no oversized decorative bar beneath the vessel.
 for(const side of [-1,1]){
  for(let z=-40;z<=43;z+=4){const taper=z<-35?Math.max(13,20+(z+35)*.65):z>39?18-(z-39)*.6:20;cylinder(ship,'Hull side rubbing strake',.12,.12,1.2,[side*taper,-1.3,z],mats.white,8).rotation.x=Math.PI/2}
  // Main deck safety rail, with the bow rails following the taper.
@@ -112,9 +112,10 @@ box(deckhouse,'Deckhouse starboard wall',[.6,5.7,19],[9.3,7.7,37.5],interiorWall
 box(deckhouse,'Deckhouse aft wall left pier',[6,5.7,.6],[-6,7.7,47],interiorWall);
 box(deckhouse,'Deckhouse aft wall right pier',[6,5.7,.6],[6,7.7,47],interiorWall);
 box(deckhouse,'Deckhouse aft doorway lintel',[6,.55,.6],[0,10.25,47],mats.yellow);
-box(deckhouse,'Deckhouse forward wall left',[6,5.7,.6],[-6,7.7,28],interiorWall);
-box(deckhouse,'Deckhouse forward wall right',[6,5.7,.6],[6,7.7,28],interiorWall);
-box(deckhouse,'Deckhouse front lintel',[6,.55,.65],[0,10.25,28],mats.yellow);
+box(deckhouse,'Deckhouse forward wall port pier',[4,5.7,.6],[-12,7.7,28],interiorWall);
+box(deckhouse,'Deckhouse forward wall starboard pier',[6,5.7,.6],[6,7.7,28],interiorWall);
+box(deckhouse,'Deckhouse stair doorway lintel',[6,.55,.65],[-7,10.25,28],mats.yellow);
+box(deckhouse,'Deckhouse front lintel',[6,.55,.65],[3,10.25,28],mats.yellow);
 box(deckhouse,'Deckhouse roof overhang',[20,.45,20],[0,10.7,37.5],mats.dark);
 for(const side of [-1,1])for(const z of [31,36,41,45]){box(deckhouse,'Deckhouse side window frame',[.22,1.6,2.8],[side*9.65,8.3,z],mats.dark);box(deckhouse,'Deckhouse side window glass',[.12,1.25,2.45],[side*9.63,8.3,z],mats.glass)}
 // Upper bridge level with wraparound glazing, wheel, navigation console and radar.
@@ -140,10 +141,16 @@ for(let i=0;i<3;i++)box(ship,'Mast antenna',[3,.12,.12],[0,22+i*.55,37.5],mats.d
 box(ship,'Funnel',[5,9,6],[9,14,17],mats.red);box(ship,'Funnel cap',[5.3,.7,6.3],[9,18.7,17],mats.dark);
 for(const side of [-1,1]){box(ship,'Funnel exhaust brace',[.35,5,.35],[side*3,12.5,17],mats.steel)}
 // Two lower internal decks inside the extended hull.
-makeDeckPlate(ship,'Accommodation deck floor with engine ladder opening',-14.5,14.5,-11,28.5,-1.5,[[-9,-5,12,28]],floorMat);
-box(ship,'Engine room floor',[29,.45,40],[0,-6.8,8.5],floorMat);
-makeDeckPlate(ship,'Accommodation ceiling with open stairwell',-14.5,14.5,-11,28.5,3.05,[[-9.5,-4.5,28,44]],interiorTrim);
+makeDeckPlate(ship,'Accommodation deck floor with clear engine ladder shaft',-14.5,14.5,-11,28.5,-1.5,[[-1.7,1.7,-7,-3]],floorMat);
+makeDeckPlate(ship,'Engine room floor with matching ladder shaft',-14.5,14.5,-11,28.5,-6.8,[[-1.7,1.7,-7,-3]],floorMat);
+makeDeckPlate(ship,'Accommodation ceiling with open stairwell',-14.5,14.5,-11,28.5,3.05,[[-10.5,-3.5,27,45]],interiorTrim);
 for(const x of [-14.2,14.2]){box(ship,'Accommodation outer bulkhead',[.5,4.6,40],[x,.75,8.5],interiorWall);box(ship,'Engine room outer bulkhead',[.5,5.1,40],[x,-3.8,8.5],interiorTrim)}
+// Enclose both ends of the accommodation and engine compartments. The aft doorway aligns with the stair landing.
+for(const z of [-11,28.5]){
+ if(z===28.5){box(ship,'Accommodation aft bulkhead left pier',[4,4.6,.5],[-12,.75,z],interiorWall);box(ship,'Accommodation aft bulkhead right pier',[18,4.6,.5],[5,.75,z],interiorWall);box(ship,'Accommodation aft doorway header',[6,.35,.5],[-7,2.85,z],interiorWall)}
+ else box(ship,'Accommodation forward bulkhead',[29,4.6,.5],[0,.75,z],interiorWall);
+ box(ship,'Engine room end bulkhead',[29,5.1,.5],[0,-3.8,z],interiorTrim);
+}
 // Accommodation rooms: galley, infirmary, crew bunks and captain's cabin.
 const accommodationProps=group(ship,[0,0,0]);
 box(ship,'Crew corridor partition',[.35,4.4,27],[0,.75,8],interiorWall);
@@ -191,9 +198,9 @@ stairFlight(7,44,29,4.35,10.95,12,'Bridge access');
 stairFlight(-7,44,28,4.35,-1.5,14,'Accommodation access');
 box(ship,'Accommodation stair landing',[4,.25,3],[-7,-1.5,28],mats.wood);
 // A vertical engine-room ladder replaces the second staircase.
-for(const x of [-8.35,-5.65])box(ship,'Engine access ladder rail',[.14,5.3,.14],[x,-4.15,20],mats.steel);
-for(let y=-1.72;y>=-6.35;y-=.46)box(ship,'Engine access ladder rung',[2.7,.12,.14],[-7,y,20],mats.yellow);
-// Keep the vertical ladder shaft clear between the two actual deck levels.
+for(const x of [-1.35,1.35])box(ship,'Engine access ladder rail',[.14,5.3,.14],[x,-4.15,-5],mats.steel);
+for(let y=-1.72;y>=-6.35;y-=.46)box(ship,'Engine access ladder rung',[2.7,.12,.14],[0,y,-5],mats.yellow);
+// The ladder is forward of the stairs, in its own unobstructed floor opening.
 // Four colour-coded loading bays stay in their existing positions for crane compatibility.
 const craneBayColors=[0xc94b3d,0x347da1,0x4d936c,0xd39a37];
 const craneBayNames=['RED','BLUE','GREEN','YELLOW'];
@@ -289,18 +296,29 @@ function shipDeckAt(x,z){
  return Math.abs(x-33)<=width;
 }
 function gangwayHeight(x,z){const dx=4.5,dz=11,den=dx*dx+dz*dz,t=((x-8.5)*dx+(z-36)*dz)/den;if(t<0||t>1)return null;const cx=8.5+t*dx,cz=36+t*dz;if(Math.hypot(x-cx,z-cz)>1.85)return null;return .5+t*3.85}
-function accommodationStairHeight(x,z){const sx=x-33;if(sx>-9.5&&sx<-4.5&&z>=28&&z<=44)return 4.35+(44-z)/16*(-5.85);return null}
+function accommodationStairHeight(x,z){const sx=x-33;if(sx>-10&&sx<-4&&z>=27&&z<=45)return 4.35+(44-z)/16*(-5.85);return null}
 function playerHeight(){const x=player.position.x,z=player.position.z,sx=x-33;
  const gangway=gangwayHeight(x,z);if(gangway!==null)return gangway;
  if(x>towerX-5&&x<towerX+5&&z>-5.5&&z<5.5&&player.position.y>9.5)return towerFloor;
  const crewStair=accommodationStairHeight(x,z);if(crewStair!==null)return crewStair;
- if(sx>5&&sx<9&&z>=29&&z<=44)return 4.35+(44-z)/15*6.6;
+ if(sx>4.5&&sx<9.5&&z>=28&&z<=44)return 4.35+(44-z)/16*6.6;
  if(sx>-9&&sx<9&&z>28.5&&z<46.5&&player.position.y>9.5)return 10.95;
  if(sx>-14.5&&sx<14.5&&z>=-11&&z<=28.5)return player.position.y<-4.1?-6.575:-1.5;
  if(shipDeckAt(x,z))return 4.35;
  if(x>=-15&&x<=8.5&&Math.abs(z)<=46)return .5;
  return .2
 }
+const solidZones=[
+ {x:18.8,z:8.5,w:.7,d:40,b:-1.6,t:3.1},{x:47.2,z:8.5,w:.7,d:40,b:-1.6,t:3.1},{x:33,z:-11,w:29,d:.7,b:-1.6,t:3.1},
+ {x:21,z:28.5,w:4,d:.7,b:-1.6,t:3.1},{x:38,z:28.5,w:18,d:.7,b:-1.6,t:3.1},
+ {x:33,z:28.5,w:29,d:.7,b:-6.9,t:-1.4},{x:18.8,z:8.5,w:.7,d:40,b:-6.9,t:-1.4},{x:47.2,z:8.5,w:.7,d:40,b:-6.9,t:-1.4},{x:33,z:-11,w:29,d:.7,b:-6.9,t:-1.4},
+ {x:33,z:8,w:.6,d:27,b:-1.6,t:3.1},{x:37,z:-2,w:.6,d:10,b:-1.6,t:3.1},{x:29,z:-1,w:.6,d:12,b:-1.6,t:3.1},
+ {x:25,z:8,w:4,d:8,b:-6.9,t:-3.2},{x:33,z:8,w:4,d:8,b:-6.9,t:-3.2},{x:41,z:8,w:4,d:8,b:-6.9,t:-3.2},
+ {x:23.7,z:37.5,w:.7,d:19,b:4.8,t:10.6},{x:42.3,z:37.5,w:.7,d:19,b:4.8,t:10.6},
+ {x:27,z:47,w:6,d:.7,b:4.8,t:10.6},{x:39,z:47,w:6,d:.7,b:4.8,t:10.6},
+ {x:21,z:28,w:4,d:.7,b:4.8,t:10.6},{x:39,z:28,w:6,d:.7,b:4.8,t:10.6}
+];
+function blockedAt(x,z){if(adminNoclip)return false;const feet=player.position.y,head=feet+1.8;for(const b of solidZones){if(head>b.b&&feet<b.t&&Math.abs(x-b.x)<b.w/2+.38&&Math.abs(z-b.z)<b.d/2+.38)return true}for(const c of crates){if(c.userData.held)continue;const p=c.position;if(head>p.y&&feet<p.y+4.2&&Math.abs(x-p.x)<3.38&&Math.abs(z-p.z)<4.38)return true}if(!packageCollected&&!packageSecured&&head>0&&feet<2.4&&Math.abs(x+61)<1.05&&Math.abs(z+14)<1.05)return true;return false}
 function findTarget(){const p=player.position;let best=null,bestD=5.2;const near=(obj,pos,dist,action,label)=>{const d=p.distanceTo(new THREE.Vector3(...pos));if(d<dist&&d<bestD){bestD=d;best={obj,action,label,d}}};
  if(!packageCollected&&!packageSecured)near(packageMesh,[-61,1,-14],5.5,'package','Collect the special package');
  if(packageCollected&&!packageSecured&&shipDeckAt(p.x,p.z)&&Math.abs(p.x-33)<10&&Math.abs(p.z)<10)near(ship,[33,5,0],7,'secure','Secure the special package aboard');
@@ -313,15 +331,15 @@ function interact(){if(!nearest){say('Nothing close enough to interact with.');r
  if(nearest.action==='crane'){craneMode=!craneMode;if(craneMode){savedPlayerYaw=yaw;yaw=-Math.PI/2;pitch=0}else{yaw=savedPlayerYaw}$('#area-name').textContent=craneMode?'CRANE CONTROL ROOM':'PORT TERMINAL';say(craneMode?'Crane controls active. Press C to switch between the control-room and overhead crane views. WASD moves the crane, R/F moves the hook, E attaches or releases a crate, Q exits.':'You step away from the control panel.');return}
  if(nearest.action==='ladder'){say('Hold W to climb all the way to the control room, then walk through the open doorway.');return}
  if(nearest.action==='package'){packageCollected=true;packageMesh.visible=false;heldVisual.visible=true;updateObjectives();say('Special package collected. Carry it aboard carefully.');return}
- if(nearest.action==='secure'){packageSecured=true;heldVisual.visible=false;packageMesh.position.set(33,5.1,0);packageMesh.visible=true;packageMesh.scale.set(.9,.9,.9);updateObjectives();say('Package secured! Keep it safe until delivery.');return}
+ if(nearest.action==='secure'){packageSecured=true;heldVisual.visible=false;packageMesh.position.set(33,4.35,0);packageMesh.visible=true;packageMesh.scale.set(.9,.9,.9);updateObjectives();say('Package secured! Keep it safe until delivery.');return}
  if(nearest.action==='crate'){say('Use the large port crane to lift this crate onto the ship.');return}
 }
-function attachOrRelease(){if(attachedCrate){const g=attachedCrate,target=craneBayPositions[g.userData.bayIndex],onShipDeck=trolleyX>14&&trolleyX<52&&Math.abs(trolleyZ)<50,distanceToBay=Math.hypot(trolleyX-(33+target.x),trolleyZ-target.z);if(onShipDeck&&hookY<17.8){say('Lower the hook until the crate is down at deck level before releasing it.');return}g.userData.held=false;g.userData.heldByCrane=false;if(onShipDeck){if(distanceToBay<=5.2){g.userData.loaded=true;g.position.set(33+target.x,4.75,target.z);g.rotation.set(0,0,0);say('Crate lowered and snapped into its matching '+craneBayNames[g.userData.bayIndex]+' bay.')}else{g.position.set(trolleyX,4.75,trolleyZ);g.rotation.set(0,0,0);say('Crate lowered onto the deck. Move it closer to its matching coloured bay to snap it into place.')}}else{g.position.set(trolleyX,.12,trolleyZ);g.rotation.set(0,0,0);say('Crate set down on the dock. Move it over the ship deck to load it.')}attachedCrate=null;updateObjectives();return}
+function attachOrRelease(){if(attachedCrate){const g=attachedCrate,target=craneBayPositions[g.userData.bayIndex],onShipDeck=trolleyX>14&&trolleyX<52&&Math.abs(trolleyZ)<50,distanceToBay=Math.hypot(trolleyX-(33+target.x),trolleyZ-target.z);if(onShipDeck&&hookY<17.8){say('Lower the hook until the crate is down at deck level before releasing it.');return}g.userData.held=false;g.userData.heldByCrane=false;if(onShipDeck){if(distanceToBay<=5.2){g.userData.loaded=true;g.position.set(33+target.x,4.35,target.z);g.rotation.set(0,0,0);say('Crate lowered and snapped into its matching '+craneBayNames[g.userData.bayIndex]+' bay.')}else{g.position.set(trolleyX,4.35,trolleyZ);g.rotation.set(0,0,0);say('Crate lowered onto the deck. Move it closer to its matching coloured bay to snap it into place.')}}else{g.position.set(trolleyX,.12,trolleyZ);g.rotation.set(0,0,0);say('Crate set down on the dock. Move it over the ship deck to load it.')}attachedCrate=null;updateObjectives();return}
  const candidates=crates.filter(c=>!c.userData.loaded&&!c.userData.held);let chosen=null,distance=5.2;for(const c of candidates){const d=Math.hypot(c.position.x-trolleyX,c.position.z-trolleyZ);if(d<distance&&hookY>17.4){chosen=c;distance=d}}
  if(chosen){attachedCrate=chosen;chosen.userData.held=true;chosen.userData.heldByCrane=true;say('Crate attached. Lift it and line it up with its matching coloured bay in the 2x2 layout.')}else say('Lower the hook over a crate on the marked staging pads first.')}
 function movePlayer(dt){if(!started||craneMode)return;
  const onLadder=Math.abs(player.position.x-towerX)<1.25&&Math.abs(player.position.z-4.45)<1.15;
- const onCrewLadder=Math.abs(player.position.x-26)<1.55&&Math.abs(player.position.z-20)<1.9&&player.position.y<-.8&&player.position.y>-7;
+ const onCrewLadder=Math.abs(player.position.x-33)<1.55&&Math.abs(player.position.z+5)<1.9&&player.position.y<-.8&&player.position.y>-7;
  if(onCrewLadder&&(keys.KeyW||keys.KeyS)){climbingLadder=true;player.userData.velocityY=0;player.position.y=THREE.MathUtils.clamp(player.position.y+(keys.KeyW?1:-1)*4.1*dt,-6.575,-1.5);}
  else if(onLadder&&((keys.KeyW&&player.position.y<towerFloor-.05)||(keys.KeyS&&player.position.y>.2))){
   climbingLadder=true;player.userData.velocityY=0;player.position.y=THREE.MathUtils.clamp(player.position.y+(keys.KeyW?1:-1)*5.2*dt,.2,towerFloor);
@@ -333,7 +351,7 @@ function movePlayer(dt){if(!started||craneMode)return;
   if(keys.KeyW)move.add(forward);if(keys.KeyS)move.sub(forward);if(keys.KeyD)move.add(right);if(keys.KeyA)move.sub(right);
   player.rotation.y=yaw;
 
-  if(move.lengthSq()){move.normalize().multiplyScalar((keys.ShiftLeft?7.2:5.2)*dt);player.position.add(move);walking+=dt*10;legL.rotation.x=Math.sin(walking)*.55;legR.rotation.x=-Math.sin(walking)*.55;armL.rotation.x=-Math.sin(walking)*.32;armR.rotation.x=Math.sin(walking)*.32}
+  if(move.lengthSq()){move.normalize().multiplyScalar((keys.ShiftLeft?7.2:5.2)*dt);const dx=move.x,dz=move.z,oldX=player.position.x,oldZ=player.position.z;player.position.x+=dx;if(blockedAt(player.position.x,oldZ))player.position.x=oldX;player.position.z+=dz;if(blockedAt(player.position.x,player.position.z))player.position.z=oldZ;walking+=dt*10;legL.rotation.x=Math.sin(walking)*.55;legR.rotation.x=-Math.sin(walking)*.55;armL.rotation.x=-Math.sin(walking)*.32;armR.rotation.x=Math.sin(walking)*.32}
   if(!adminNoclip){player.position.x=THREE.MathUtils.clamp(player.position.x,-112,56);player.position.z=THREE.MathUtils.clamp(player.position.z,-72,72);}
   if(player.position.x>-48&&player.position.x<-43&&player.position.z>-31&&player.position.z<-9)player.position.x=-48;
   if(!adminNoclip&&player.position.x>17.8&&player.position.x<19&&!shipDeckAt(player.position.x,player.position.z)&&!(player.position.z>27&&player.position.z<35))player.position.x=17.8;
@@ -348,7 +366,7 @@ function movePlayer(dt){if(!started||craneMode)return;
 function moveCrane(dt){if(!craneMode)return;const speed=12;if(keys.KeyA)trolleyX-=speed*dt;if(keys.KeyD)trolleyX+=speed*dt;if(keys.KeyW)trolleyZ-=speed*dt;if(keys.KeyS)trolleyZ+=speed*dt;if(keys.KeyR)hookY=Math.min(18.2,hookY+9*dt);if(keys.KeyF)hookY=Math.max(2,hookY-9*dt);trolleyX=THREE.MathUtils.clamp(trolleyX,-29,48);trolleyZ=THREE.MathUtils.clamp(trolleyZ,-32,32);updateCrane();if(attachedCrate){attachedCrate.position.set(trolleyX,22.8-hookY,trolleyZ);attachedCrate.rotation.y=0}}
 function cameraUpdate(dt){for(const part of player.children)if(part!==armL&&part!==armR&&part!==heldVisual)part.visible=!firstPerson;if(craneMode){if(firstPerson){camera.position.set(towerX+3.55,towerFloor+2.15,towerZ);camera.rotation.order='YXZ';camera.rotation.set(pitch,yaw,0,'YXZ')}else{const desired=new THREE.Vector3(trolleyX-13,34,trolleyZ+18);camera.position.lerp(desired,1-Math.pow(.0001,dt));camera.lookAt(trolleyX,14,trolleyZ)}return}const eye=player.position.clone().add(new THREE.Vector3(0,firstPerson?1.78:2.65,0));const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));if(firstPerson){camera.position.copy(eye);camera.rotation.order='YXZ';camera.rotation.y=yaw;camera.rotation.x=pitch}else{const behind=forward.clone().multiplyScalar(-8);const desired=eye.clone().add(behind).add(new THREE.Vector3(0,3.6,0));camera.position.lerp(desired,1-Math.pow(.0001,dt));const target=eye.clone().add(forward.multiplyScalar(8)).add(new THREE.Vector3(0,Math.sin(pitch)*5,0));camera.lookAt(target)}}
 function areaLabel(){const x=player.position.x;if(x<-47&&player.position.z<-8&&player.position.z>-34)return ['WAREHOUSE','SPECIAL PACKAGE'];if(Math.abs(x-towerX)<7&&player.position.y>9)return ['CRANE CONTROL TOWER','CONTROL ROOM'];if(x>15)return ['MV WAYFARER','CARGO DECK'];if(craneMode)return ['PORT CRANE','LOADING AREA'];return ['PORT TERMINAL','DOCKSIDE']}
-function openPauseMenu(){paused=true;locked=false;if(document.pointerLockElement)document.exitPointerLock();for(const k in keys)keys[k]=false;$('#pause-menu').classList.remove('hidden');$('#pause-main').classList.remove('hidden');$('#pause-settings').classList.add('hidden')};function closePauseMenu(){paused=false;$('#pause-menu').classList.add('hidden');if(started)renderer.domElement.requestPointerLock()};$('#resume-game').addEventListener('click',closePauseMenu);$('#pause-settings-button').addEventListener('click',()=>{$('#pause-main').classList.add('hidden');$('#pause-settings').classList.remove('hidden')});$('#settings-back').addEventListener('click',()=>{$('#pause-settings').classList.add('hidden');$('#pause-main').classList.remove('hidden')});$('#admin-unlock').addEventListener('click',()=>{if($('#admin-code').value==='password'){$('#admin-lock').classList.add('hidden');$('#admin-tools').classList.remove('hidden');$('#admin-error').textContent='ADMIN ACCESS GRANTED';$('#admin-error').style.color='#82e0a5'}else{$('#admin-error').textContent='Incorrect code';$('#admin-error').style.color='#ff8c7c'}});$('#admin-code').addEventListener('keydown',e=>{if(e.key==='Enter')$('#admin-unlock').click()});$('#admin-fly').addEventListener('change',e=>{adminFly=e.target.checked;if(!adminFly&&player.position.y>playerHeight()+.1){player.position.y=playerHeight();player.userData.velocityY=0}say(adminFly?'Admin flight enabled. Space rises; Shift descends.':'Admin flight disabled.')});$('#admin-noclip').addEventListener('change',e=>{adminNoclip=e.target.checked;say(adminNoclip?'Admin noclip enabled.':'Admin noclip disabled.')});$('#admin-autoload').addEventListener('click',()=>{crates.forEach((g,i)=>{const p=craneBayPositions[i];g.userData.loaded=true;g.userData.held=false;g.userData.heldByCrane=false;g.position.set(33+p.x,4.75,p.z);g.rotation.set(0,0,0)});attachedCrate=null;packageCollected=true;packageSecured=true;packageMesh.position.set(33,5.1,0);packageMesh.visible=true;heldVisual.visible=false;updateObjectives();say('ADMIN: all four containers loaded and the special package secured.');closePauseMenu()});
+function openPauseMenu(){paused=true;locked=false;if(document.pointerLockElement)document.exitPointerLock();for(const k in keys)keys[k]=false;$('#pause-menu').classList.remove('hidden');$('#pause-main').classList.remove('hidden');$('#pause-settings').classList.add('hidden')};function closePauseMenu(){paused=false;$('#pause-menu').classList.add('hidden');if(started)renderer.domElement.requestPointerLock()};$('#resume-game').addEventListener('click',closePauseMenu);$('#pause-settings-button').addEventListener('click',()=>{$('#pause-main').classList.add('hidden');$('#pause-settings').classList.remove('hidden')});$('#settings-back').addEventListener('click',()=>{$('#pause-settings').classList.add('hidden');$('#pause-main').classList.remove('hidden')});$('#admin-unlock').addEventListener('click',()=>{if($('#admin-code').value==='password'){$('#admin-lock').classList.add('hidden');$('#admin-tools').classList.remove('hidden');$('#admin-error').textContent='ADMIN ACCESS GRANTED';$('#admin-error').style.color='#82e0a5'}else{$('#admin-error').textContent='Incorrect code';$('#admin-error').style.color='#ff8c7c'}});$('#admin-code').addEventListener('keydown',e=>{if(e.key==='Enter')$('#admin-unlock').click()});$('#admin-fly').addEventListener('change',e=>{adminFly=e.target.checked;if(!adminFly&&player.position.y>playerHeight()+.1){player.position.y=playerHeight();player.userData.velocityY=0}say(adminFly?'Admin flight enabled. Space rises; Shift descends.':'Admin flight disabled.')});$('#admin-noclip').addEventListener('change',e=>{adminNoclip=e.target.checked;say(adminNoclip?'Admin noclip enabled.':'Admin noclip disabled.')});$('#admin-autoload').addEventListener('click',()=>{crates.forEach((g,i)=>{const p=craneBayPositions[i];g.userData.loaded=true;g.userData.held=false;g.userData.heldByCrane=false;g.position.set(33+p.x,4.35,p.z);g.rotation.set(0,0,0)});attachedCrate=null;packageCollected=true;packageSecured=true;packageMesh.position.set(33,5.1,0);packageMesh.visible=true;heldVisual.visible=false;updateObjectives();say('ADMIN: all four containers loaded and the special package secured.');closePauseMenu()});
 function tick(){requestAnimationFrame(tick);const rawDt=Math.min(clock.getDelta(),.04),dt=paused?0:rawDt,t=clock.elapsedTime;const pos=waterGeo.attributes.position;for(let i=0;i<pos.count;i++){const x=waterBase[i*3],z=waterBase[i*3+2];pos.array[i*3+1]=(x+90>11&&x+90<55&&z>-56&&z<54)?-20:Math.sin(x*.04+t)*.28+Math.cos(z*.05+t*.7)*.2}pos.needsUpdate=true;waterGeo.computeVertexNormals();
  if(started&&!paused){movePlayer(dt);moveCrane(dt);nearest=craneMode?{action:'crane-controls',label:'Crane controls'}:findTarget();if(craneMode){prompt.classList.remove('hidden');promptText.textContent='W/S crane bridge · A/D trolley · R lower · F raise hook · E attach/release · Q exit'}else if(nearest){prompt.classList.remove('hidden');promptText.textContent=nearest.label}else prompt.classList.add('hidden');const [a,b]=areaLabel();$('#area-name').textContent=a;$('#coordinates').textContent=b;cameraUpdate(dt)}
  if(noticeTimer>0){noticeTimer-=dt;if(noticeTimer<=0)message.style.opacity='0'}renderer.render(scene,camera)}
