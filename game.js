@@ -155,7 +155,7 @@ for(const x of [-14.2,14.2]){box(ship,'Accommodation outer bulkhead',[.5,4.6,40]
 for(const z of [-11,28.5]){
  if(z===28.5){box(ship,'Accommodation aft bulkhead left pier',[4,4.6,.5],[-12,.75,z],interiorWall);box(ship,'Accommodation aft bulkhead right pier',[18,4.6,.5],[5,.75,z],interiorWall);box(ship,'Accommodation aft doorway header',[6,.35,.5],[-7,2.85,z],interiorWall)}
  else box(ship,'Accommodation forward bulkhead',[29,4.6,.5],[0,.75,z],interiorWall);
- box(ship,'Engine room end bulkhead',[29,5.1,.5],[0,-3.8,z],interiorTrim);
+ if(z===28.5){box(ship,'Engine room aft bulkhead left pier',[4,5.1,.5],[-12,-3.8,z],interiorTrim);box(ship,'Engine room aft bulkhead right pier',[18,5.1,.5],[5,-3.8,z],interiorTrim)}else box(ship,'Engine room end bulkhead',[29,5.1,.5],[0,-3.8,z],interiorTrim);
 }
 // Accommodation rooms: galley, infirmary, crew bunks and captain's cabin.
 const accommodationProps=group(ship,[0,0,0]);
@@ -296,35 +296,22 @@ let climbingLadder=false;
 const keys={};const clock=new THREE.Clock();let nearest=null;
 function say(text){message.textContent=text;message.style.opacity='1';noticeTimer=2.7}
 function updateObjectives(){const count=crates.filter(c=>c.userData.loaded).length;$('#crate-count').textContent=count+' / 4';$('#crate-objective').classList.toggle('done',count===4);$('#package-state').textContent=packageCollected?'COLLECTED':'NOT COLLECTED';$('#package-objective').classList.toggle('done',packageCollected);$('#secure-state').textContent=packageSecured?'SECURED':'WAITING';$('#secure-objective').classList.toggle('done',packageSecured)}
-function shipDeckAt(x,z){
- const profile=[[-50,8],[-48,13],[-36,18],[-15,20],[15,20],[36,19],[48,16],[53,13]];if(z<profile[0][0]||z>profile[profile.length-1][0])return false;
- let width=profile[profile.length-1][1];for(let i=0;i<profile.length-1;i++){const a=profile[i],b=profile[i+1];if(z>=a[0]&&z<=b[0]){const t=(z-a[0])/(b[0]-a[0]);width=a[1]+(b[1]-a[1])*t;break}}
- return Math.abs(x-33)<=width;
-}
-function gangwayHeight(x,z){const dx=4.5,dz=11,den=dx*dx+dz*dz,t=((x-8.5)*dx+(z-36)*dz)/den;if(t<0||t>1)return null;const cx=8.5+t*dx,cz=36+t*dz;if(Math.hypot(x-cx,z-cz)>1.85)return null;return .5+t*3.85}
-function accommodationStairHeight(x,z){const sx=x-33;if(sx>-10&&sx<-4&&z>=27&&z<=45)return 4.35+(44-z)/16*(-5.85);return null}
-function playerHeight(){const x=player.position.x,z=player.position.z,sx=x-33;
- const gangway=gangwayHeight(x,z);if(gangway!==null)return gangway;
- if(x>towerX-5&&x<towerX+5&&z>-5.5&&z<5.5&&player.position.y>9.5)return towerFloor;
- const crewStair=accommodationStairHeight(x,z);if(crewStair!==null)return crewStair;
- if(sx>4.5&&sx<9.5&&z>=28&&z<=44)return 4.35+(44-z)/16*6.6;
- if(sx>-9&&sx<9&&z>28.5&&z<46.5&&player.position.y>9.5)return 10.95;
- if(sx>-14.5&&sx<14.5&&z>=-11&&z<=28.5)return player.position.y<-4.1?-6.575:-1.5;
- if(shipDeckAt(x,z))return 4.35;
- if(x>=-15&&x<=8.5&&Math.abs(z)<=46)return .5;
- return .2
-}
+function shipDeckAt(x,z){const p=[[-50,8],[-48,13],[-36,18],[-15,20],[15,20],[36,19],[48,16],[53,13]];if(z<p[0][0]||z>53)return false;let w=13;for(let i=0;i<p.length-1;i++){const a=p[i],b=p[i+1];if(z>=a[0]&&z<=b[0]){const t=(z-a[0])/(b[0]-a[0]);w=a[1]+(b[1]-a[1])*t;break}}return Math.abs(x-33)<=w}
+function gangwayHeight(x,z){const dx=4.5,dz=11,t=((x-8.5)*dx+(z-36)*dz)/(dx*dx+dz*dz);if(t<0||t>1)return null;const cx=8.5+t*dx,cz=36+t*dz;if(Math.hypot(x-cx,z-cz)>1.85)return null;return .5+t*3.85}
+function accommodationStairHeight(x,z){const sx=x-33;return sx>-10.5&&sx<-3.5&&z>=27.5&&z<=44.5?4.35+(44-z)/16*(-5.85):null}
+function playerHeight(){const x=player.position.x,z=player.position.z,sx=x-33;const gangway=gangwayHeight(x,z);if(gangway!==null)return gangway;if(x>towerX-5&&x<towerX+5&&z>-5.5&&z<5.5&&player.position.y>9.5)return towerFloor;const stair=accommodationStairHeight(x,z);if(stair!==null)return stair;if(sx>4.5&&sx<9.5&&z>=28&&z<=44)return 4.35+(44-z)/16*6.6;if(sx>-9&&sx<9&&z>28.5&&z<46.5&&player.position.y>9.5)return 10.95;
+ // Three decks share this footprint. Preserve the current vertical layer.
+ if(sx>-14.5&&sx<14.5&&z>=-11&&z<=28.5){if(player.position.y>2.6)return 4.35;if(player.position.y>-4.15)return -1.5;return -6.8}
+ if(shipDeckAt(x,z))return 4.35;if(x>=-15&&x<=8.5&&Math.abs(z)<=46)return .5;return .2}
 const solidZones=[
- {x:18.8,z:8.5,w:.7,d:40,b:-1.6,t:3.1},{x:47.2,z:8.5,w:.7,d:40,b:-1.6,t:3.1},{x:33,z:-11,w:29,d:.7,b:-1.6,t:3.1},
- {x:21,z:28.5,w:4,d:.7,b:-1.6,t:3.1},{x:38,z:28.5,w:18,d:.7,b:-1.6,t:3.1},
- {x:33,z:28.5,w:29,d:.7,b:-6.9,t:-1.4},{x:18.8,z:8.5,w:.7,d:40,b:-6.9,t:-1.4},{x:47.2,z:8.5,w:.7,d:40,b:-6.9,t:-1.4},{x:33,z:-11,w:29,d:.7,b:-6.9,t:-1.4},
- {x:33,z:8,w:.6,d:27,b:-1.6,t:3.1},{x:37,z:-2,w:.6,d:10,b:-1.6,t:3.1},{x:29,z:-1,w:.6,d:12,b:-1.6,t:3.1},
- {x:25,z:8,w:4,d:8,b:-6.9,t:-3.2},{x:33,z:8,w:4,d:8,b:-6.9,t:-3.2},{x:41,z:8,w:4,d:8,b:-6.9,t:-3.2},
- {x:23.7,z:37.5,w:.7,d:19,b:4.8,t:10.6},{x:42.3,z:37.5,w:.7,d:19,b:4.8,t:10.6},
- {x:27,z:47,w:6,d:.7,b:4.8,t:10.6},{x:39,z:47,w:6,d:.7,b:4.8,t:10.6},
- {x:21,z:28,w:4,d:.7,b:4.8,t:10.6},{x:39,z:28,w:6,d:.7,b:4.8,t:10.6}
-];
-function blockedAt(x,z){if(adminNoclip)return false;const feet=player.position.y,head=feet+1.8;for(const b of solidZones){if(head>b.b&&feet<b.t&&Math.abs(x-b.x)<b.w/2+.38&&Math.abs(z-b.z)<b.d/2+.38)return true}for(const c of crates){if(c.userData.held)continue;const p=c.position;if(head>p.y&&feet<p.y+4.2&&Math.abs(x-p.x)<3.38&&Math.abs(z-p.z)<4.38)return true}if(!packageCollected&&!packageSecured&&head>0&&feet<2.4&&Math.abs(x+61)<1.05&&Math.abs(z+14)<1.05)return true;return false}
+{x:18.8,z:8.5,w:.7,d:40,b:-1.6,t:3.1},{x:47.2,z:8.5,w:.7,d:40,b:-1.6,t:3.1},{x:33,z:-11,w:29,d:.7,b:-1.6,t:3.1},
+{x:21,z:28.5,w:4,d:.7,b:-1.6,t:3.1},{x:38,z:28.5,w:18,d:.7,b:-1.6,t:3.1},
+{x:21,z:28.5,w:4,d:.7,b:-6.9,t:-1.4},{x:38,z:28.5,w:18,d:.7,b:-6.9,t:-1.4},
+{x:18.8,z:8.5,w:.7,d:40,b:-6.9,t:-1.4},{x:47.2,z:8.5,w:.7,d:40,b:-6.9,t:-1.4},{x:33,z:-11,w:29,d:.7,b:-6.9,t:-1.4},
+{x:33,z:8,w:.6,d:27,b:-1.6,t:3.1},{x:37,z:-2,w:.6,d:10,b:-1.6,t:3.1},{x:29,z:-1,w:.6,d:12,b:-1.6,t:3.1},
+{x:25,z:8,w:4,d:8,b:-6.9,t:-3.2},{x:33,z:8,w:4,d:8,b:-6.9,t:-3.2},{x:41,z:8,w:4,d:8,b:-6.9,t:-3.2},
+{x:23.7,z:37.5,w:.7,d:19,b:4.8,t:10.6},{x:42.3,z:37.5,w:.7,d:19,b:4.8,t:10.6},{x:27,z:47,w:6,d:.7,b:4.8,t:10.6},{x:39,z:47,w:6,d:.7,b:4.8,t:10.6},{x:21,z:28,w:4,d:.7,b:4.8,t:10.6},{x:39,z:28,w:6,d:.7,b:4.8,t:10.6}];
+function blockedAt(x,z){if(adminNoclip)return false;const feet=player.position.y,head=feet+1.8;for(const b of solidZones)if(head>b.b&&feet<b.t&&Math.abs(x-b.x)<b.w/2+.38&&Math.abs(z-b.z)<b.d/2+.38)return true;for(const c of crates){if(c.userData.held)continue;const p=c.position;if(head>p.y&&feet<p.y+4.2&&Math.abs(x-p.x)<3.38&&Math.abs(z-p.z)<4.38)return true}if(!packageCollected&&!packageSecured&&head>0&&feet<2.4&&Math.abs(x+61)<1.05&&Math.abs(z+14)<1.05)return true;return false}
 function findTarget(){const p=player.position;let best=null,bestD=5.2;const near=(obj,pos,dist,action,label)=>{const d=p.distanceTo(new THREE.Vector3(...pos));if(d<dist&&d<bestD){bestD=d;best={obj,action,label,d}}};
  if(!packageCollected&&!packageSecured)near(packageMesh,[-61,1,-14],5.5,'package','Collect the special package');
  if(packageCollected&&!packageSecured&&shipDeckAt(p.x,p.z)&&Math.abs(p.x-33)<10&&Math.abs(p.z)<10)near(ship,[33,5,0],7,'secure','Secure the special package aboard');
